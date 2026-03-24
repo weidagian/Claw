@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>意见反馈 - 子问设计助手</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .feedback-container {
+            max-width: 600px;
+            margin: 80px auto 40px;
+            padding: 2rem;
+        }
+        .feedback-card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 2.5rem;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+        }
+        .feedback-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .feedback-header h1 {
+            font-size: 1.75rem;
+            color: #1a1a2e;
+            margin-bottom: 0.5rem;
+        }
+        .feedback-header p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #333;
+            font-weight: 500;
+        }
+        .form-group select,
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+            box-sizing: border-box;
+        }
+        .form-group select:focus,
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #4a90d9;
+        }
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        .submit-btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, #4a90d9 0%, #67b26f 100%);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(74,144,217,0.3);
+        }
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+        .back-home {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 1.5rem;
+            color: #4a90d9;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        .back-home:hover {
+            text-decoration: underline;
+        }
+        .success-message {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+        .success-message.show {
+            display: block;
+        }
+        .success-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <a href="index.html" class="logo">
+                <div class="logo-icon">Z</div>
+                <span>子问设计助手</span>
+            </a>
+        </div>
+    </header>
+
+    <div class="feedback-container">
+        <div class="feedback-card">
+            <div id="formSection">
+                <div class="feedback-header">
+                    <h1>意见反馈</h1>
+                    <p>您的意见对我们非常重要，欢迎提出宝贵建议</p>
+                </div>
+                <form id="feedbackForm">
+                    <div class="form-group">
+                        <label>反馈类型</label>
+                        <select name="type" required>
+                            <option value="bug">🐛 功能异常/Bug</option>
+                            <option value="suggest">💡 功能建议</option>
+                            <option value="experience">👤 使用体验</option>
+                            <option value="other">📝 其他</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>反馈内容</label>
+                        <textarea name="content" placeholder="请详细描述您遇到的问题或建议..." required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>联系方式（选填）</label>
+                        <input type="text" name="contact" placeholder="手机号或微信号，便于我们回复您">
+                    </div>
+                    <button type="submit" class="submit-btn">提交反馈</button>
+                </form>
+                <div style="text-align: center;">
+                    <a href="index.html" class="back-home">← 返回首页</a>
+                </div>
+            </div>
+            <div id="successSection" class="success-message">
+                <div class="success-icon">✅</div>
+                <h2>反馈提交成功！</h2>
+                <p>感谢您的反馈，我们会认真处理</p>
+                <a href="index.html" class="back-home" style="justify-content: center; margin-top: 2rem;">← 返回首页</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('feedbackForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const form = e.target;
+            const formData = new FormData(form);
+            
+            const user = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            
+            const data = {
+                type: formData.get('type'),
+                content: formData.get('content'),
+                contact: formData.get('contact'),
+                username: user.username || ''
+            };
+            
+            try {
+                const response = await fetch('/api/feedback', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    document.getElementById('formSection').style.display = 'none';
+                    document.getElementById('successSection').classList.add('show');
+                } else {
+                    alert(result.message || '提交失败，请重试');
+                }
+            } catch (error) {
+                alert('网络错误，请重试');
+            }
+        });
+    </script>
+</body>
+</html>

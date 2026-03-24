@@ -1,0 +1,282 @@
+/* 帮助页面样式 */
+.help-container {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.help-title {
+    font-size: 2rem;
+    font-weight: 800;
+    text-align: center;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, var(--primary) 0%, #8B5CF6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.help-intro {
+    text-align: center;
+    color: var(--text-secondary);
+    margin-bottom: 2rem;
+    font-size: 1rem;
+}
+
+.help-toc {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    justify-content: center;
+    margin-bottom: 2rem;
+    padding: 1rem;
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+}
+
+.help-toc a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    background: var(--bg);
+    border-radius: 50px;
+    font-size: 0.875rem;
+    transition: var(--transition);
+}
+
+.help-toc a:hover {
+    background: var(--primary-light);
+    color: var(--primary);
+}
+
+.help-section {
+    margin-bottom: 2rem;
+}
+
+.help-section h2 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.help-card {
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    box-shadow: var(--shadow);
+}
+
+.help-card h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 1.25rem 0 0.75rem;
+    color: var(--primary);
+}
+
+.help-card h3:first-child {
+    margin-top: 0;
+}
+
+.help-card p {
+    color: var(--text-secondary);
+    line-height: 1.8;
+    margin-bottom: 0.75rem;
+}
+
+.help-card ul {
+    padding-left: 1.5rem;
+    color: var(--text-secondary);
+}
+
+.help-card li {
+    margin-bottom: 0.5rem;
+    line-height: 1.7;
+}
+
+.help-card li strong {
+    color: var(--text);
+}
+
+/* 风格网格 */
+.style-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+    margin: 1rem 0;
+}
+
+.style-item {
+    background: var(--bg);
+    padding: 1rem;
+    border-radius: var(--radius-sm);
+    border-left: 3px solid var(--primary);
+}
+
+.style-item strong {
+    display: block;
+    margin-bottom: 0.25rem;
+    color: var(--text);
+}
+
+.style-item span {
+    font-size: 0.8rem;
+    color: var(--text-light);
+}
+
+/* 表格 */
+.help-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+}
+
+.help-table th,
+.help-table td {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+}
+
+.help-table th {
+    font-weight: 600;
+    color: var(--text);
+    background: var(--bg);
+}
+
+.help-table td {
+    color: var(--text-secondary);
+}
+
+/* 创意程度等级 */
+.creativity-levels {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin: 1rem 0;
+}
+
+.level-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1rem;
+    background: var(--bg);
+    border-radius: var(--radius-sm);
+    transition: var(--transition);
+}
+
+.level-item:hover {
+    background: var(--primary-light);
+}
+
+.level-highlight {
+    background: linear-gradient(135deg, var(--primary-light) 0%, #EDE9FE 100%);
+    border: 2px solid var(--primary);
+}
+
+.level-num {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, var(--primary) 0%, #8B5CF6 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.875rem;
+    flex-shrink: 0;
+}
+
+.level-content strong {
+    display: block;
+    margin-bottom: 0.25rem;
+    color: var(--text);
+}
+
+.level-content p {
+    font-size: 0.875rem;
+    margin: 0;
+}
+
+/* 提示框 */
+.notice-box {
+    background: #FEF3C7;
+    border: 1px solid #FCD34D;
+    border-radius: var(--radius-sm);
+    padding: 1rem;
+    margin: 1rem 0;
+}
+
+.notice-box strong {
+    color: #92400E;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.notice-box p {
+    color: #92400E;
+    margin: 0;
+}
+
+/* FAQ */
+.faq-item {
+    margin-bottom: 1.25rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.faq-item:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.faq-item h3 {
+    color: var(--text);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.faq-item p {
+    margin: 0;
+}
+
+/* 联系信息 */
+.contact-info {
+    font-size: 1.1rem;
+    color: var(--primary);
+    font-weight: 600;
+    margin: 1rem 0;
+}
+
+@media (max-width: 768px) {
+    .help-title {
+        font-size: 1.5rem;
+    }
+    
+    .help-toc {
+        gap: 0.5rem;
+    }
+    
+    .help-toc a {
+        padding: 0.375rem 0.75rem;
+        font-size: 0.8rem;
+    }
+    
+    .style-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .help-table {
+        font-size: 0.8rem;
+    }
+    
+    .help-table th,
+    .help-table td {
+        padding: 0.5rem;
+    }
+}

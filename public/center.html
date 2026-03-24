@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人中心 - 子问设计助手</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .center-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .center-header {
+            background: linear-gradient(135deg, var(--primary) 0%, #8B5CF6 100%);
+            border-radius: var(--radius);
+            padding: 2rem;
+            color: #fff;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+        
+        .center-avatar {
+            width: 80px;
+            height: 80px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: 700;
+        }
+        
+        .center-info h2 {
+            font-size: 1.5rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        .center-info p {
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+        
+        .center-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .stat-card {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            padding: 1.25rem;
+            text-align: center;
+            box-shadow: var(--shadow);
+        }
+        
+        .stat-card .num {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+        
+        .stat-card .label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+        
+        .center-menu {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+        
+        .menu-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .menu-item:last-child {
+            border-bottom: none;
+        }
+        
+        .menu-item:hover {
+            background: var(--bg);
+        }
+        
+        .menu-item .left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .menu-item .icon {
+            width: 40px;
+            height: 40px;
+            background: var(--primary-light);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+        
+        .menu-item .text {
+            font-weight: 500;
+        }
+        
+        .menu-item .arrow {
+            color: var(--text-light);
+        }
+        
+        .login-required {
+            text-align: center;
+            padding: 3rem;
+        }
+        
+        .login-required p {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+        
+        .vip-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            color: #000;
+            padding: 0.25rem 0.75rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+        
+        @media (max-width: 480px) {
+            .center-header {
+                padding: 1.5rem;
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .menu-item {
+                padding: 0.875rem 1rem;
+            }
+            
+            .menu-item .icon {
+                width: 36px;
+                height: 36px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">Z</div>
+                <div class="logo-text">
+                    <span class="logo-title">子问设计助手</span>
+                    <span class="logo-subtitle">室内设计师的谈单神器</span>
+                </div>
+            </div>
+            <nav class="header-nav">
+                <a href="index.html" class="nav-link">首页</a>
+                <a href="work.html" class="nav-link">开始创作</a>
+                <a href="help.html" class="nav-link">帮助</a>
+                <a href="center.html" class="nav-link active">个人中心</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="center-container" id="centerContent">
+            <!-- 内容由 JS 动态加载 -->
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-links">
+                <a href="index.html">首页</a>
+                <a href="work.html">开始创作</a>
+                <a href="help.html">使用帮助</a>
+                <a href="center.html">个人中心</a>
+                <a href="privacy.html">隐私协议</a>
+                <a href="terms.html">服务条款</a>
+                <a href="admin.html">管理后台</a>
+            </div>
+            <p class="footer-copyright">&copy; 2026 子问设计助手 版权所有</p>
+        </div>
+    </footer>
+
+    <script src="js/center.js"></script>
+</body>
+</html>

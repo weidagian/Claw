@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>开始创作 - 子问设计助手</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/work.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <a href="index.html" class="logo">
+                <div class="logo-icon">Z</div>
+                <div class="logo-text">
+                    <span class="logo-title">子问设计助手</span>
+                    <span class="logo-subtitle">室内设计师的谈单神器</span>
+                </div>
+            </a>
+            <nav class="header-nav">
+                <a href="index.html" class="nav-link">首页</a>
+                <a href="work.html" class="nav-link active">开始创作</a>
+                <a href="help.html" class="nav-link">帮助</a>
+                <a href="center.html" class="nav-link">个人中心</a>
+                <span id="userInfo"></span>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="work-container">
+            <!-- 左侧：控制面板 -->
+            <div class="control-panel">
+                <!-- 上传区域 -->
+                <div class="upload-section">
+                    <h3>上传户型图</h3>
+                    <div class="upload-area" id="uploadArea">
+                        <input type="file" id="fileInput" accept="image/*" hidden>
+                        <div class="upload-placeholder" id="uploadPlaceholder">
+                            <div class="upload-icon">📷</div>
+                            <p>点击上传户型图/平面图</p>
+                            <p class="upload-hint">支持 JPG、PNG</p>
+                        </div>
+                        <img id="previewImage" class="preview-image" hidden>
+                    </div>
+                </div>
+
+                <!-- 设置区域 -->
+                <div class="settings-section">
+                    <!-- 风格选择 -->
+                    <div class="setting-item">
+                        <label>选择风格</label>
+                        <select id="styleSelect" class="setting-select">
+                            <!-- 动态填充 -->
+                        </select>
+                    </div>
+
+                    <!-- 画质选择 -->
+                    <div class="setting-item">
+                        <label>画质选择</label>
+                        <select id="modelSelect" class="setting-select">
+                            <option value="fast">快速预览 - 0.5点/张</option>
+                            <option value="hd">高清商用 - 2点/张</option>
+                            <option value="pro">专业极致 - 4点/张</option>
+                        </select>
+                    </div>
+
+                    <!-- 创意程度滑块 -->
+                    <div class="setting-item">
+                        <label>创意程度</label>
+                        <div class="creativity-slider">
+                            <div class="slider-labels">
+                                <span>严格</span>
+                                <span id="creativityValue">5</span>
+                                <span>创意</span>
+                            </div>
+                            <input type="range" id="creativityRange" min="1" max="10" value="5" class="slider">
+                            <div class="creativity-desc" id="creativityDesc">视觉效果最好的平衡点</div>
+                        </div>
+                    </div>
+
+                    <!-- 空间选择（多选）-->
+                    <div class="setting-item">
+                        <label>生成空间 <span class="setting-hint">(可多选)</span></label>
+                        
+                        <!-- 快速选择 -->
+                        <div class="space-presets">
+                            <select id="presetSelect" class="setting-select" onchange="applyPreset()">
+                                <option value="">-- 快速选择 --</option>
+                                <option value="living,master">一室一厅（2空间）</option>
+                                <option value="living,master,second" selected>两室一厅（3空间）</option>
+                                <option value="living,master,second,dining">三室一厅（4空间）</option>
+                                <option value="living,master,second,dining,kitchen">三室两厅（5空间）</option>
+                                <option value="living,master,second,dining,kitchen,study">四室两厅（6空间）</option>
+                                <option value="custom">自定义选择</option>
+                            </select>
+                        </div>
+                        
+                        <!-- 空间列表 -->
+                        <div class="space-grid" id="spaceGrid">
+                            <!-- 动态填充 -->
+                        </div>
+                        
+                        <!-- 已选数量 -->
+                        <div class="space-count">
+                            已选 <span id="selectedCount">0</span> 个空间
+                            <span class="cost-estimate" id="costEstimate"></span>
+                        </div>
+                    </div>
+
+                    <!-- 补充说明 -->
+                    <div class="setting-item">
+                        <label>补充说明 <span class="optional">(选填)</span></label>
+                        <textarea id="extraPrompt" class="setting-textarea" placeholder="如有特殊需求，请在此补充说明..."></textarea>
+                    </div>
+
+                    <!-- 生成按钮 -->
+                    <button id="generateBtn" class="generate-btn" disabled>
+                        <span class="btn-text">生成效果图</span>
+                        <div class="progress-bar" hidden>
+                            <div class="progress-fill" id="progressFill"></div>
+                        </div>
+                        <div class="progress-text" id="progressText" hidden></div>
+                    </button>
+                    
+                    <!-- 剩余次数提示 -->
+                    <div class="times-tip" id="timesTip">
+                        您当前剩余 <span id="remainingTimes">3</span> 次免费机会
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧：结果展示 -->
+            <div class="result-panel">
+                <h3>效果图展示</h3>
+                <div class="compare-container" id="compareContainer">
+                    <div class="compare-placeholder">
+                        <p>上传户型图并选择空间后，点击生成</p>
+                    </div>
+                </div>
+                <div class="result-actions" id="resultActions" hidden>
+                    <button class="action-btn download-btn" id="downloadBtn">
+                        <span>📥</span> 打包下载
+                    </button>
+                    <button class="action-btn share-btn" id="shareBtn">
+                        <span>📤</span> 分享
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 历史记录 -->
+        <section class="history-section">
+            <div class="history-header">
+                <h3>历史作品</h3>
+                <p class="history-notice">我们不会保存您的图片，请及时下载保存。历史记录仅保存在您设备的浏览器缓存中。</p>
+            </div>
+            <div class="history-grid" id="historyGrid">
+                <!-- 动态填充 -->
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-links">
+                <a href="index.html">首页</a>
+                <a href="work.html">开始创作</a>
+                <a href="help.html">使用帮助</a>
+                <a href="center.html">个人中心</a>
+                <a href="privacy.html">隐私协议</a>
+                <a href="terms.html">服务条款</a>
+                <a href="admin.html">管理后台</a>
+            </div>
+            <p class="footer-copyright">&copy; 2026 子问设计助手 版权所有</p>
+        </div>
+    </footer>
+
+    <script src="js/config.js"></script>
+    <script src="js/work.js"></script>
+</body>
+</html>
