@@ -8,8 +8,8 @@ const CONFIG = {
     MODELS: {
         // 快速预览 - 最便宜
         fast: {
-            name: 'gpt-image-1.5',
-            altNames: ['nano-banana-fast', 'sora-image'],
+            name: 'nano-banana-fast',
+            altNames: ['nano-banana-fast', 'gpt-image-1.5'],
             label: '快速预览',
             quality: '预览',
             price: '0.5点/张',
