@@ -381,7 +381,9 @@ async function generateSingleImage(imageData, style, creativityLevel, extraPromp
             urls: [imageData], // 支持直接传入 base64 图片
             prompt: promptData.prompt,
             aspectRatio: 'auto',
-            webHook: '-1' // 立即返回 id，使用轮询方式获取结果
+            imageSize: '1K',
+            webHook: '-1', // 立即返回 id，使用轮询方式获取结果
+            shutProgress: true
         })
     });
 
@@ -431,18 +433,26 @@ async function pollForResult(taskId, maxAttempts = 180, interval = 3000) {
             const data = await response.json();
             console.log(`轮询结果 (${i+1}/${maxAttempts}):`, data);
 
-            // 检查任务状态
-            if (data.status === 'succeeded' && data.results && data.results.length > 0) {
-                console.log(`任务成功完成! 图片URL:`, data.results[0].url);
-                return {
-                    success: true,
-                    image: data.results[0].url // 返回图片 URL
-                };
-            } else if (data.status === 'failed') {
-                console.error(`任务失败:`, data.failure_reason || data.error);
-                throw new Error(data.failure_reason || data.error || '生成失败');
-            } else if (data.status === 'running' || data.progress < 100) {
-                console.log(`任务进行中... 进度: ${data.progress}%`);
+            // 根据文档：响应格式为 { code: 0, data: {...}, msg: "success" }
+            // 状态字段在 data.status 里
+            if (data.code === 0 && data.data) {
+                const taskData = data.data;
+
+                // 检查任务状态
+                if (taskData.status === 'succeeded' && taskData.results && taskData.results.length > 0) {
+                    console.log(`✅ 任务成功完成! 图片URL:`, taskData.results[0].url);
+                    return {
+                        success: true,
+                        image: taskData.results[0].url // 返回图片 URL
+                    };
+                } else if (taskData.status === 'failed') {
+                    console.error(`❌ 任务失败:`, taskData.failure_reason || taskData.error);
+                    throw new Error(taskData.failure_reason || taskData.error || '生成失败');
+                } else if (taskData.status === 'running') {
+                    console.log(`⏳ 任务进行中... 进度: ${taskData.progress}%`);
+                }
+            } else if (data.code === -22) {
+                throw new Error('任务不存在');
             }
 
             // 如果还在进行中，继续轮询
@@ -641,26 +651,33 @@ async function shareAllImages() {
 // 历史记录
 function saveToHistory(original, results) {
     let history = JSON.parse(localStorage.getItem('generateHistory') || '[]');
-    
+
     history.unshift({
-        original,
+        original: original, // 保留原图 base64
         results: results.map(r => ({
             spaceId: r.spaceId,
             spaceName: r.spaceName,
             spaceIcon: r.spaceIcon,
-            image: r.image
+            image: r.image // 保留结果图 URL 或 base64
         })),
         time: Date.now(),
         style: styleSelect.value,
         model: modelSelect.value
     });
-    
-    // 最多保留 20 条
-    if (history.length > 20) {
-        history = history.slice(0, 20);
+
+    // 最多保留 5 条（减少数量以避免超出配额）
+    if (history.length > 5) {
+        history = history.slice(0, 5);
     }
-    
-    localStorage.setItem('generateHistory', JSON.stringify(history));
+
+    try {
+        localStorage.setItem('generateHistory', JSON.stringify(history));
+    } catch (error) {
+        console.error('保存历史记录失败:', error);
+        // 如果保存失败，删除最旧的一条重试
+        history = history.slice(0, 4);
+        localStorage.setItem('generateHistory', JSON.stringify(history));
+    }
     renderHistory();
 }
 
