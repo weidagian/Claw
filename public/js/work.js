@@ -4,6 +4,7 @@ let resultImages = [];  // 支持多张图片
 let selectedSpaces = [];  // 已选空间
 let sliderPosition = 50;
 let isGenerating = false;
+let currentMode = 'sketch';  // 当前模式: 'sketch' (线稿) 或 'floorplan' (平面图)
 
 // DOM 元素
 const fileInput = document.getElementById('fileInput');
@@ -30,6 +31,7 @@ const remainingTimesEl = document.getElementById('remainingTimes');
 
 // 初始化
 document.addEventListener('DOMContentLoaded', () => {
+    initTabs();
     initStyles();
     initSpaces();
     initDefaultSpaces();
@@ -40,6 +42,47 @@ document.addEventListener('DOMContentLoaded', () => {
     loadUserInfo();
     updateRemainingTimes();
 });
+
+// 初始化标签页切换
+function initTabs() {
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const floorplanNotice = document.getElementById('floorplanNotice');
+    const uploadTitle = document.getElementById('uploadTitle');
+    const uploadHint = document.getElementById('uploadHint');
+
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            // 移除所有active状态
+            tabBtns.forEach(b => b.classList.remove('active'));
+            // 添加当前active状态
+            btn.classList.add('active');
+
+            // 切换模式
+            currentMode = btn.dataset.tab;
+
+            // 根据模式显示不同内容
+            if (currentMode === 'sketch') {
+                floorplanNotice.classList.add('hidden');
+                uploadTitle.textContent = '上传线稿图';
+                uploadHint.textContent = '点击上传手绘线稿';
+            } else {
+                floorplanNotice.classList.remove('hidden');
+                uploadTitle.textContent = '上传平面图';
+                uploadHint.textContent = '点击上传户型平面图';
+                // 平面图模式默认选择客厅+卧室
+                selectedSpaces = ['living', 'master'];
+                document.querySelectorAll('.space-item').forEach(item => {
+                    if (selectedSpaces.includes(item.dataset.space)) {
+                        item.classList.add('selected');
+                    } else {
+                        item.classList.remove('selected');
+                    }
+                });
+                updateSpaceCount();
+            }
+        });
+    });
+}
 
 // 初始化风格下拉框
 function initStyles() {
@@ -69,7 +112,7 @@ function toggleSpace(spaceId) {
     } else {
         selectedSpaces.push(spaceId);
     }
-    
+
     // 更新UI
     document.querySelectorAll('.space-item').forEach(item => {
         if (selectedSpaces.includes(item.dataset.space)) {
@@ -78,60 +121,11 @@ function toggleSpace(spaceId) {
             item.classList.remove('selected');
         }
     });
-    
-    // 更新预设选择
-    updatePresetSelection();
+
     updateSpaceCount();
 }
 
-// 应用预设
-function applyPreset() {
-    const value = presetSelect.value;
-    if (!value || value === 'custom') {
-        if (value === 'custom') {
-            selectedSpaces = [];
-        }
-    } else {
-        selectedSpaces = value.split(',');
-    }
-    
-    // 更新UI
-    document.querySelectorAll('.space-item').forEach(item => {
-        if (selectedSpaces.includes(item.dataset.space)) {
-            item.classList.add('selected');
-        } else {
-            item.classList.remove('selected');
-        }
-    });
-    
-    updateSpaceCount();
-}
-
-// 更新预设选择状态
-function updatePresetSelection() {
-    const presetValues = {
-        'living,master': 'living,master',
-        'living,master,second': 'living,master,second',
-        'living,master,second,dining': 'living,master,second,dining',
-        'living,master,second,dining,kitchen': 'living,master,second,dining,kitchen',
-        'living,master,second,dining,kitchen,study': 'living,master,second,dining,kitchen,study'
-    };
-    
-    const currentStr = selectedSpaces.sort().join(',');
-    let found = false;
-    for (const [key, value] of Object.entries(presetValues)) {
-        if (key === currentStr) {
-            presetSelect.value = value;
-            found = true;
-            break;
-        }
-    }
-    if (!found) {
-        presetSelect.value = 'custom';
-    }
-}
-
-// 默认选择两室一厅
+// 默认选择两室一厅（线稿模式）
 function initDefaultSpaces() {
     selectedSpaces = ['living', 'master', 'second'];
     document.querySelectorAll('.space-item').forEach(item => {
@@ -139,7 +133,6 @@ function initDefaultSpaces() {
             item.classList.add('selected');
         }
     });
-    updatePresetSelection();
     updateSpaceCount();
 }
 
@@ -365,8 +358,8 @@ async function generateSingleImage(imageData, style, creativityLevel, extraPromp
     const model = CONFIG.MODELS[modelSelect.value];
 
     // 构建提示词
-    const promptData = buildPrompt(style, creativityLevel, extraPrompt, spaceId);
-    console.log(`开始生成图片 - 模型: ${model.name}, 空间: ${spaceId}`);
+    const promptData = buildPrompt(style, creativityLevel, extraPrompt, spaceId, currentMode);
+    console.log(`开始生成图片 - 模型: ${model.name}, 空间: ${spaceId}, 模式: ${currentMode}`);
     console.log(`提示词:`, promptData.prompt);
 
     // 调用正确的 API: /v1/draw/nano-banana
@@ -769,7 +762,6 @@ function logout() {
 
 // 暴露给全局
 window.toggleSpace = toggleSpace;
-window.applyPreset = applyPreset;
 window.showSingleCompare = showSingleCompare;
 window.loadHistoryBatch = loadHistoryBatch;
 window.deleteHistoryItem = deleteHistoryItem;

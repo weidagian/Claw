@@ -31,14 +31,20 @@
         <div class="work-container">
             <!-- 左侧：控制面板 -->
             <div class="control-panel">
+                <!-- 功能标签页 -->
+                <div class="tabs-container">
+                    <button class="tab-btn active" data-tab="sketch">线稿转效果图</button>
+                    <button class="tab-btn" data-tab="floorplan">平面图生成效果图</button>
+                </div>
+
                 <!-- 上传区域 -->
                 <div class="upload-section">
-                    <h3>上传户型图</h3>
+                    <h3 id="uploadTitle">上传线稿图</h3>
                     <div class="upload-area" id="uploadArea">
                         <input type="file" id="fileInput" accept="image/*" hidden>
                         <div class="upload-placeholder" id="uploadPlaceholder">
                             <div class="upload-icon">📷</div>
-                            <p>点击上传户型图/平面图</p>
+                            <p id="uploadHint">点击上传手绘线稿</p>
                             <p class="upload-hint">支持 JPG、PNG</p>
                         </div>
                         <img id="previewImage" class="preview-image" hidden>
@@ -82,29 +88,24 @@
                     <!-- 空间选择（多选）-->
                     <div class="setting-item">
                         <label>生成空间 <span class="setting-hint">(可多选)</span></label>
-                        
-                        <!-- 快速选择 -->
-                        <div class="space-presets">
-                            <select id="presetSelect" class="setting-select" onchange="applyPreset()">
-                                <option value="">-- 快速选择 --</option>
-                                <option value="living,master">一室一厅（2空间）</option>
-                                <option value="living,master,second" selected>两室一厅（3空间）</option>
-                                <option value="living,master,second,dining">三室一厅（4空间）</option>
-                                <option value="living,master,second,dining,kitchen">三室两厅（5空间）</option>
-                                <option value="living,master,second,dining,kitchen,study">四室两厅（6空间）</option>
-                                <option value="custom">自定义选择</option>
-                            </select>
-                        </div>
-                        
+
                         <!-- 空间列表 -->
                         <div class="space-grid" id="spaceGrid">
                             <!-- 动态填充 -->
                         </div>
-                        
+
                         <!-- 已选数量 -->
                         <div class="space-count">
                             已选 <span id="selectedCount">0</span> 个空间
                             <span class="cost-estimate" id="costEstimate"></span>
+                        </div>
+                    </div>
+
+                    <!-- 平面图模式提示（仅平面图标签显示） -->
+                    <div class="setting-item floorplan-notice hidden" id="floorplanNotice">
+                        <div class="notice-box">
+                            <p>⚠️ <strong>平面图模式说明</strong></p>
+                            <p>平面图生成效果图为实验性功能，效果可能不如线稿转换理想。建议使用线稿模式可获得更好的效果。</p>
                         </div>
                     </div>
 

@@ -283,23 +283,44 @@ function getCreativityPrompt(level) {
 }
 
 // 构建完整提示词
-function buildPrompt(style, creativityLevel, extraPrompt, spaceId = null) {
+function buildPrompt(style, creativityLevel, extraPrompt, spaceId = null, mode = 'sketch') {
     const creativity = getCreativityPrompt(creativityLevel);
-    
-    let fullPrompt = `${style.name}风格室内设计。`;
-    
-    if (spaceId && CONFIG.SPACE_PROMPTS[spaceId]) {
-        fullPrompt += CONFIG.SPACE_PROMPTS[spaceId] + '。';
+
+    let fullPrompt = '';
+
+    // 根据模式选择不同的提示词
+    if (mode === 'sketch') {
+        // 线稿模式
+        fullPrompt = `${style.name}风格室内设计。`;
+
+        if (spaceId && CONFIG.SPACE_PROMPTS[spaceId]) {
+            fullPrompt += CONFIG.SPACE_PROMPTS[spaceId] + '。';
+        }
+
+        fullPrompt += creativity.prompt;
+    } else {
+        // 平面图模式
+        fullPrompt = `${style.name}风格室内设计。根据上传的平面图生成`;
+
+        if (spaceId && CONFIG.SPACE_PROMPTS[spaceId]) {
+            fullPrompt += CONFIG.SPACE_PROMPTS[spaceId] + '。';
+        } else {
+            fullPrompt += '空间效果图。';
+        }
+
+        if (creativityLevel <= 5) {
+            fullPrompt += `严格遵循平面图的布局和空间比例，保留墙体的位置和结构，门窗位置准确。`;
+        } else {
+            fullPrompt += `参考平面图的布局进行合理设计，可以适当调整空间比例以获得更好的视觉效果。`;
+        }
     }
-    
-    fullPrompt += creativity.prompt;
-    
+
     if (extraPrompt && extraPrompt.trim()) {
         fullPrompt += `。另外：${extraPrompt}`;
     }
-    
+
     fullPrompt += `。请去除所有水印和文字，不要显示任何logo、签名。`;
-    
+
     return {
         prompt: fullPrompt,
         negative: creativity.negative
