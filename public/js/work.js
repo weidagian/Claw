@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initTabs();
     initStyles();
     initSpaces();
-    initDefaultSpaces();
+    // 不再调用 initDefaultSpaces，因为线稿模式不需要默认空间
     initCreativitySlider();
     initUpload();
     initGenerate();
@@ -46,6 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
 function initTabs() {
     const tabBtns = document.querySelectorAll('.tab-btn');
     const floorplanNotice = document.getElementById('floorplanNotice');
+    const spaceSection = document.getElementById('spaceSection');
     const uploadTitle = document.getElementById('uploadTitle');
     const uploadHint = document.getElementById('uploadHint');
 
@@ -61,11 +62,17 @@ function initTabs() {
 
             // 根据模式显示不同内容
             if (currentMode === 'sketch') {
+                // 线稿模式：隐藏空间选择，隐藏提示
                 floorplanNotice.classList.add('hidden');
+                spaceSection.classList.add('hidden');
                 uploadTitle.textContent = '上传线稿图';
                 uploadHint.textContent = '点击上传手绘线稿';
+                // 线稿模式清空空间选择
+                selectedSpaces = [];
             } else {
+                // 平面图模式：显示空间选择，显示提示
                 floorplanNotice.classList.remove('hidden');
+                spaceSection.classList.remove('hidden');
                 uploadTitle.textContent = '上传平面图';
                 uploadHint.textContent = '点击上传户型平面图';
                 // 平面图模式默认只选择客厅
@@ -77,8 +84,9 @@ function initTabs() {
                         item.classList.remove('selected');
                     }
                 });
-                updateSpaceCount();
             }
+            updateSpaceCount();
+            checkCanGenerate();
         });
     });
 }
@@ -124,15 +132,10 @@ function toggleSpace(spaceId) {
     updateSpaceCount();
 }
 
-// 默认选择两室一厅（线稿模式）
+// 默认选择两室一厅（线稿模式）- 已废弃
+// 线稿模式不再需要默认空间选择
 function initDefaultSpaces() {
-    selectedSpaces = ['living', 'master', 'second'];
-    document.querySelectorAll('.space-item').forEach(item => {
-        if (selectedSpaces.includes(item.dataset.space)) {
-            item.classList.add('selected');
-        }
-    });
-    updateSpaceCount();
+    // 空函数，保留兼容性
 }
 
 // 更新空间数量和预估费用
@@ -251,8 +254,16 @@ function handleFile(file) {
 // 检查是否可以生成
 function checkCanGenerate() {
     const hasImage = !!currentImage;
-    const hasSpaces = selectedSpaces.length > 0;
-    generateBtn.disabled = !(hasImage && hasSpaces);
+
+    // 线稿模式：只需要图片
+    // 平面图模式：需要图片和空间选择
+    let canGenerate = hasImage;
+    if (currentMode === 'floorplan') {
+        const hasSpaces = selectedSpaces.length > 0;
+        canGenerate = hasImage && hasSpaces;
+    }
+
+    generateBtn.disabled = !canGenerate;
 }
 
 // 初始化生成功能
@@ -264,12 +275,22 @@ function initGenerate() {
 
 // 批量生成
 async function startBatchGenerate() {
-    if (!currentImage || selectedSpaces.length === 0 || isGenerating) return;
-    
+    if (!currentImage || isGenerating) return;
+
+    // 线稿模式：生成1张，不需要空间
+    // 平面图模式：根据选择的空间数量生成
+    const spaceCount = currentMode === 'sketch' ? 1 : selectedSpaces.length;
+    const spaceIds = currentMode === 'sketch' ? [null] : selectedSpaces;
+
+    if (currentMode === 'floorplan' && spaceIds.length === 0) {
+        alert('请至少选择一个空间');
+        return;
+    }
+
     // 检查次数
     const model = modelSelect.value;
-    const checkResult = checkAndDeduct(model, selectedSpaces.length);
-    
+    const checkResult = checkAndDeduct(model, spaceCount);
+
     if (!checkResult.success) {
         alert(checkResult.message);
         if (checkResult.needLogin) {
@@ -277,35 +298,37 @@ async function startBatchGenerate() {
         }
         return;
     }
-    
+
     isGenerating = true;
     generateBtn.disabled = true;
     generateBtn.classList.add('loading');
-    generateBtn.querySelector('.btn-text').textContent = `生成中 (0/${selectedSpaces.length})`;
-    
+    const btnText = generateBtn.querySelector('.btn-text');
+    btnText.textContent = `生成中 (0/${spaceCount})`;
+
     const progressBar = generateBtn.querySelector('.progress-bar');
     const progressText = generateBtn.querySelector('.progress-text');
     progressBar.hidden = false;
     progressText.hidden = false;
-    
+
     resultImages = [];
     const results = [];
-    
+
     try {
         const style = { name: styleSelect.value };
         const creativityLevel = parseInt(creativityRange.value);
         const extra = extraPrompt.value;
-        
-        // 逐个生成每个空间
-        for (let i = 0; i < selectedSpaces.length; i++) {
-            const spaceId = selectedSpaces[i];
-            const space = CONFIG.SPACES.find(s => s.id === spaceId);
-            
+
+        // 逐个生成
+        for (let i = 0; i < spaceIds.length; i++) {
+            const spaceId = spaceIds[i];
+            const space = spaceId ? CONFIG.SPACES.find(s => s.id === spaceId) : null;
+            const spaceName = space?.name || (currentMode === 'sketch' ? '效果图' : '未知');
+
             updateProgress(
-                Math.round((i / selectedSpaces.length) * 80),
-                `正在生成 ${space?.name || '空间'}... (${i + 1}/${selectedSpaces.length})`
+                Math.round((i / spaceIds.length) * 80),
+                `正在生成 ${spaceName}... (${i + 1}/${spaceIds.length})`
             );
-            
+
             try {
                 const result = await generateSingleImage(
                     currentImage,
@@ -314,12 +337,12 @@ async function startBatchGenerate() {
                     extra,
                     spaceId
                 );
-                
+
                 if (result.success && result.image) {
                     results.push({
                         spaceId: spaceId,
-                        spaceName: space?.name || '未知',
-                        spaceIcon: space?.icon || '📷',
+                        spaceName: spaceName,
+                        spaceIcon: space?.icon || '🎨',
                         image: result.image
                     });
                 }
@@ -327,28 +350,28 @@ async function startBatchGenerate() {
                 console.error(`生成 ${spaceId} 失败:`, err);
             }
         }
-        
+
         updateProgress(90, '处理完成...');
-        
+
         // 显示结果
         resultImages = results;
         showBatchResults(results);
-        
+
         // 记录风格使用
         recordStyleUsage(styleSelect.value);
-        
+
         // 保存到历史记录
         saveToHistory(currentImage, results);
-        
+
         // 更新剩余次数显示
         updateRemainingTimes();
-        
+
         updateProgress(100, '完成!');
-        
+
     } catch (error) {
         alert('生成失败: ' + error.message);
     }
-    
+
     resetGenerateButton();
 }
 
@@ -473,18 +496,22 @@ function updateProgress(percent, text) {
 // 重置生成按钮
 function resetGenerateButton() {
     isGenerating = false;
-    generateBtn.disabled = !currentImage || selectedSpaces.length === 0;
+
+    // 线稿模式：只要有图片就可以生成
+    // 平面图模式：需要图片和空间选择
+    let canGenerate = !!currentImage;
+    if (currentMode === 'floorplan') {
+        canGenerate = !!currentImage && selectedSpaces.length > 0;
+    }
+
+    generateBtn.disabled = !canGenerate;
     generateBtn.classList.remove('loading');
     generateBtn.querySelector('.btn-text').textContent = '生成效果图';
-    
+
     const progressBar = generateBtn.querySelector('.progress-bar');
     const progressText = generateBtn.querySelector('.progress-text');
     progressBar.hidden = true;
     progressText.hidden = true;
-    
-    if (selectedSpaces.length > 0) {
-        generateBtn.querySelector('.btn-text').textContent = '生成效果图';
-    }
 }
 
 // 显示批量结果

@@ -85,8 +85,16 @@
                         </div>
                     </div>
 
-                    <!-- 空间选择（多选）-->
-                    <div class="setting-item">
+                    <!-- 平面图模式提示（仅平面图标签显示） -->
+                    <div class="setting-item floorplan-notice hidden" id="floorplanNotice">
+                        <div class="notice-box">
+                            <p>⚠️ <strong>平面图模式说明</strong></p>
+                            <p>平面图生成效果图为实验性功能，效果可能不如线稿转换理想。建议使用线稿模式可获得更好的效果。</p>
+                        </div>
+                    </div>
+
+                    <!-- 空间选择（多选，仅平面图模式显示）-->
+                    <div class="setting-item hidden" id="spaceSection">
                         <label>生成空间 <span class="setting-hint">(可多选)</span></label>
 
                         <!-- 空间列表 -->
@@ -98,14 +106,6 @@
                         <div class="space-count">
                             已选 <span id="selectedCount">0</span> 个空间
                             <span class="cost-estimate" id="costEstimate"></span>
-                        </div>
-                    </div>
-
-                    <!-- 平面图模式提示（仅平面图标签显示） -->
-                    <div class="setting-item floorplan-notice hidden" id="floorplanNotice">
-                        <div class="notice-box">
-                            <p>⚠️ <strong>平面图模式说明</strong></p>
-                            <p>平面图生成效果图为实验性功能，效果可能不如线稿转换理想。建议使用线稿模式可获得更好的效果。</p>
                         </div>
                     </div>
 
