@@ -6,6 +6,40 @@
     margin-bottom: 2rem;
 }
 
+/* 移动端响应式布局 */
+@media (max-width: 1024px) {
+    .work-container {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .control-panel {
+        position: static;
+        max-height: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .work-container {
+        gap: 0.5rem;
+    }
+
+    .control-panel {
+        border-radius: 0;
+        box-shadow: none;
+        padding: 1rem;
+    }
+
+    .tabs-container {
+        margin-bottom: 1rem;
+    }
+
+    .tab-btn {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.8rem;
+    }
+}
+
 /* 控制面板 */
 .control-panel {
     background: var(--bg-card);

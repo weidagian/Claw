@@ -24,7 +24,6 @@ const downloadBtn = document.getElementById('downloadBtn');
 const shareBtn = document.getElementById('shareBtn');
 const historyGrid = document.getElementById('historyGrid');
 const spaceGrid = document.getElementById('spaceGrid');
-const presetSelect = document.getElementById('presetSelect');
 const selectedCount = document.getElementById('selectedCount');
 const costEstimate = document.getElementById('costEstimate');
 const remainingTimesEl = document.getElementById('remainingTimes');
@@ -69,8 +68,8 @@ function initTabs() {
                 floorplanNotice.classList.remove('hidden');
                 uploadTitle.textContent = '上传平面图';
                 uploadHint.textContent = '点击上传户型平面图';
-                // 平面图模式默认选择客厅+卧室
-                selectedSpaces = ['living', 'master'];
+                // 平面图模式默认只选择客厅
+                selectedSpaces = ['living'];
                 document.querySelectorAll('.space-item').forEach(item => {
                     if (selectedSpaces.includes(item.dataset.space)) {
                         item.classList.add('selected');
