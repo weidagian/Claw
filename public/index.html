@@ -2,93 +2,129 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>子问设计助手 - AI 智能室内设计</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>子问设计助手 - 室内设计师的谈单神器</title>
     <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/landing.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .hero {
+            text-align: center;
+            padding: 4rem 1rem;
+            background: linear-gradient(180deg, #f0f9ff 0%, #fff 100%);
+        }
+        .hero-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #2563eb 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .hero-subtitle {
+            font-size: 1.25rem;
+            color: #64748b;
+            margin-bottom: 2rem;
+        }
+        .hero-cta {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            padding: 2rem 0;
+        }
+        .feature-card {
+            background: #fff;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            transition: transform 0.2s;
+        }
+        .feature-card:hover {
+            transform: translateY(-4px);
+        }
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+        .feature-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        .feature-desc {
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+    </style>
 </head>
-<body class="landing-page">
-    <!-- Hero 区 -->
-    <section class="hero">
-        <div class="hero-bg"></div>
-        <div class="hero-content">
-            <div class="hero-logo">
-                <div class="logo-icon">
-                    <i class="fas fa-home"></i>
-                </div>
-                <h1 class="logo-title">子问设计</h1>
-                <p class="logo-subtitle">AI 智能室内设计助手</p>
-            </div>
-            
-            <h2 class="hero-title">将您的线稿<br>变成精美效果图</h2>
-            <p class="hero-desc">上传室内设计线稿，AI 智能生成多种风格效果图</p>
-            
-            <div class="hero-actions">
-                <a href="login.html" class="btn-primary">
-                    <i class="fas fa-rocket"></i>
-                    <span>立即开始</span>
-                </a>
-                <a href="work.html?guest=1" class="btn-secondary">
-                    <i class="fas fa-ghost"></i>
-                    <span>先体验</span>
-                </a>
-            </div>
-            
-            <!-- 特性 -->
-            <div class="features">
-                <div class="feature-item">
-                    <div class="feature-icon">
-                        <i class="fas fa-magic"></i>
-                    </div>
-                    <h3>AI 智能生成</h3>
-                    <p>基于 AI 大模型，智能理解线稿内容</p>
-                </div>
-                <div class="feature-item">
-                    <div class="feature-icon">
-                        <i class="fas fa-palette"></i>
-                    </div>
-                    <h3>多种风格</h3>
-                    <p>支持现代、北欧、新中式等多种风格</p>
-                </div>
-                <div class="feature-item">
-                    <div class="feature-icon">
-                        <i class="fas fa-bolt"></i>
-                    </div>
-                    <h3>快速出图</h3>
-                    <p>几秒钟内生成高质量效果图</p>
-                </div>
-            </div>
+<body>
+    <header class="header">
+        <div class="container header-content">
+            <a href="index.html" class="logo">
+                <div class="logo-icon">Z</div>
+                <span>子问设计助手</span>
+            </a>
+            <nav class="nav">
+                <a href="work.html" class="nav-link">开始创作</a>
+                <a href="login.html" class="nav-link" id="loginLink">登录</a>
+            </nav>
         </div>
-    </section>
+    </header>
 
-    <!-- 使用流程 -->
-    <section class="steps">
-        <h2 class="section-title">使用流程</h2>
-        <div class="steps-grid">
-            <div class="step-item">
-                <div class="step-num">1</div>
-                <h3>上传线稿</h3>
-                <p>上传室内设计手绘稿或 CAD 导出图</p>
+    <main class="container">
+        <section class="hero">
+            <h1 class="hero-title">室内设计师的谈单神器</h1>
+            <p class="hero-subtitle">AI 智能生成室内效果图，助您快速出图，高效谈单</p>
+            <div class="hero-cta">
+                <a href="work.html?guest=1" class="btn btn-primary">立即体验</a>
+                <a href="login.html" class="btn btn-secondary">账号登录</a>
             </div>
-            <div class="step-item">
-                <div class="step-num">2</div>
-                <h3>选择风格</h3>
-                <p>挑选喜欢的设计风格和空间类型</p>
-            </div>
-            <div class="step-item">
-                <div class="step-num">3</div>
-                <h3>AI 生成</h3>
-                <p>AI 自动渲染，快速生成效果图</p>
-            </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- 底部 -->
+        <section class="features">
+            <div class="feature-card">
+                <div class="feature-icon">🎨</div>
+                <h3 class="feature-title">多种风格</h3>
+                <p class="feature-desc">支持现代简约、北欧、新中式等多种风格</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">⚡</div>
+                <h3 class="feature-title">快速出图</h3>
+                <p class="feature-desc">AI 智能生成，几秒钟即可获得效果图</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📱</div>
+                <h3 class="feature-title">移动友好</h3>
+                <p class="feature-desc">支持手机、平板随时随地工作</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔒</div>
+                <h3 class="feature-title">安全可靠</h3>
+                <p class="feature-desc">数据本地存储，保护客户隐私</p>
+            </div>
+        </section>
+    </main>
+
     <footer class="footer">
-        <p>&copy; 2024 子问设计助手. All rights reserved.</p>
+        <div class="container">
+            <p>&copy; 2026 子问设计助手 版权所有</p>
+        </div>
     </footer>
 
     <script src="js/main.js"></script>
+    <script>
+        // 检查登录状态
+        const token = localStorage.getItem('token');
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+
+        if (token && user.username) {
+            document.getElementById('loginLink').textContent = user.username;
+            document.getElementById('loginLink').href = 'work.html';
+        }
+    </script>
 </body>
 </html>
