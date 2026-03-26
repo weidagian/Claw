@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>登录 - 子问设计助手</title>
     <link rel="stylesheet" href="css/style.css">
+<<<<<<< HEAD
     <style>
         .auth-container {
             min-height: 100vh;
@@ -95,12 +96,16 @@
             text-decoration: none;
         }
     </style>
+=======
+    <link rel="stylesheet" href="css/auth.css">
+>>>>>>> 3c5a4d43196a713ba5b7dfb06c76062e2c2d4474
 </head>
 <body>
     <div class="auth-container">
         <div class="auth-box">
             <div class="auth-header">
                 <h1>
+<<<<<<< HEAD
                     <div class="logo-icon" style="width: 32px; height: 32px; font-size: 18px;">Z</div>
                     子问设计助手
                 </h1>
@@ -144,10 +149,37 @@
 
             <div class="tips">
                 <a href="work.html?guest=1">直接体验（无需注册）</a>
+=======
+                    <div class="logo-icon">Z</div>
+                    子问设计助手
+                </h1>
+                <p>登录后享受更多免费次数</p>
+            </div>
+            
+            <!-- 登录表单 -->
+            <form id="login-form" class="auth-form">
+                <div class="form-group">
+                    <label for="login-username">用户名</label>
+                    <input type="text" id="login-username" name="username" required placeholder="请输入用户名">
+                </div>
+                <div class="form-group">
+                    <label for="login-password">密码</label>
+                    <input type="password" id="login-password" name="password" required placeholder="请输入密码">
+                </div>
+                <button type="submit" class="btn-submit">登录</button>
+                <div class="auth-links">
+                    <a href="register.html">还没有账号？立即注册</a>
+                </div>
+            </form>
+            
+            <div class="auth-footer">
+                <a href="work-v3.html?guest=true">暂不登录，先去体验 &gt;</a>
+>>>>>>> 3c5a4d43196a713ba5b7dfb06c76062e2c2d4474
             </div>
         </div>
     </div>
 
+<<<<<<< HEAD
     <script>
         let currentTab = 'login';
 
@@ -233,5 +265,9 @@
             window.location.href = 'work.html';
         }
     </script>
+=======
+    <script src="js/config.js"></script>
+    <script src="js/auth.js"></script>
+>>>>>>> 3c5a4d43196a713ba5b7dfb06c76062e2c2d4474
 </body>
 </html>

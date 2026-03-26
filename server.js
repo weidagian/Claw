@@ -1,5 +1,5 @@
 /**
- * 子问设计助手 V2 - 主服务器
+ * 子问设计助手 - 主服务器
  */
 
 const express = require('express');
@@ -7,7 +7,6 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const path = require('path');
 const fs = require('fs');
-const dataService = require('./dataService');
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -20,29 +19,141 @@ app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
 // 静态文件
 app.use(express.static(path.join(__dirname, 'public')));
 
-// 日志目录
-const LOGS_DIR = path.join(__dirname, 'logs');
-if (!fs.existsSync(LOGS_DIR)) {
-    fs.mkdirSync(LOGS_DIR, { recursive: true });
+// 数据存储路径
+const DATA_DIR = path.join(__dirname, 'data');
+const USERS_FILE = path.join(DATA_DIR, 'users.json');
+const STATS_FILE = path.join(DATA_DIR, 'stats.json');
+const HISTORY_FILE = path.join(DATA_DIR, 'history.json');
+const MODELS_FILE = path.join(DATA_DIR, 'models.json');
+const SETTINGS_FILE = path.join(DATA_DIR, 'settings.json');
+
+// 确保数据目录存在
+if (!fs.existsSync(DATA_DIR)) {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
 }
 
-// 错误日志
-function logError(message, error) {
-    const logFile = path.join(LOGS_DIR, 'error.log');
-    const timestamp = new Date().toISOString();
-    const logMessage = `[${timestamp}] ${message}: ${error.stack || error}\n`;
-    fs.appendFileSync(logFile, logMessage);
-    console.error(logMessage);
+// 初始化数据文件
+function initDataFiles() {
+    if (!fs.existsSync(USERS_FILE)) {
+        fs.writeFileSync(USERS_FILE, JSON.stringify([], null, 2));
+    }
+    if (!fs.existsSync(STATS_FILE)) {
+        fs.writeFileSync(STATS_FILE, JSON.stringify({
+            totalUsers: 0,
+            totalGenerations: 0,
+            dailyStats: {},
+            userStats: {}
+        }, null, 2));
+    }
+    if (!fs.existsSync(HISTORY_FILE)) {
+        fs.writeFileSync(HISTORY_FILE, JSON.stringify([], null, 2));
+    }
+    if (!fs.existsSync(MODELS_FILE)) {
+        fs.writeFileSync(MODELS_FILE, JSON.stringify([
+            { id: 'fast', name: 'nano-banana-fast', label: '快速预览', quality: '预览', price: '0.5点/张', enabled: true, endpoint: 'https://grsai.dakka.com.cn/v1/draw/nano-banana', apiKey: 'sk-e8f308bbe3d94ab68cdb3b81657bbddc', modelId: 'nano-banana-fast' },
+            { id: 'hd', name: 'nano-banana-pro', label: '高清商用', quality: '高清', price: '2点/张', enabled: true, endpoint: 'https://grsai.dakka.com.cn/v1/draw/nano-banana', apiKey: 'sk-e8f308bbe3d94ab68cdb3b81657bbddc', modelId: 'nano-banana-pro' },
+            { id: 'pro', name: 'nano-banana-pro-4k-vip', label: '专业极致', quality: '4K', price: '4点/张', enabled: true, endpoint: 'https://grsai.dakka.com.cn/v1/draw/nano-banana', apiKey: 'sk-e8f308bbe3d94ab68cdb3b81657bbddc', modelId: 'nano-banana-pro-4k-vip' }
+        ], null, 2));
+    }
+    if (!fs.existsSync(SETTINGS_FILE)) {
+        fs.writeFileSync(SETTINGS_FILE, JSON.stringify({
+            admin: { username: 'admin', password: 'ziwen2024' },
+            styles: [
+                { id: 'modern', name: '现代简约' },
+                { id: 'nordic', name: '北欧风格' },
+                { id: 'chinese', name: '新中式' },
+                { id: 'luxury', name: '轻奢风格' },
+                { id: 'industrial', name: '工业风' },
+                { id: 'japanese', name: '日式风格' },
+                { id: 'american', name: '美式风格' },
+                { id: 'european', name: '欧式风格' }
+            ]
+        }, null, 2));
+    }
 }
 
-// ==================== 认证中间件 ====================
+initDataFiles();
 
-// 简单token验证（生产环境建议用JWT）
+// 数据读写函数
+function getUsers() {
+    try {
+        return JSON.parse(fs.readFileSync(USERS_FILE, 'utf8'));
+    } catch {
+        return [];
+    }
+}
+
+function saveUsers(users) {
+    fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
+}
+
+function getStats() {
+    try {
+        return JSON.parse(fs.readFileSync(STATS_FILE, 'utf8'));
+    } catch {
+        return { totalUsers: 0, totalGenerations: 0, dailyStats: {}, userStats: {} };
+    }
+}
+
+function saveStats(stats) {
+    fs.writeFileSync(STATS_FILE, JSON.stringify(stats, null, 2));
+}
+
+function getHistory() {
+    try {
+        return JSON.parse(fs.readFileSync(HISTORY_FILE, 'utf8'));
+    } catch {
+        return [];
+    }
+}
+
+function saveHistory(history) {
+    fs.writeFileSync(HISTORY_FILE, JSON.stringify(history, null, 2));
+}
+
+function getModels() {
+    try {
+        return JSON.parse(fs.readFileSync(MODELS_FILE, 'utf8'));
+    } catch {
+        return [];
+    }
+}
+
+function getSettings() {
+    try {
+        return JSON.parse(fs.readFileSync(SETTINGS_FILE, 'utf8'));
+    } catch {
+        return { admin: { username: 'admin', password: 'ziwen2024' }, styles: [] };
+    }
+}
+
+function getModelByQuality(quality) {
+    const models = getModels();
+    const qualityMap = {
+        '标准': 'fast',
+        '快速': 'fast',
+        '高清': 'hd',
+        '专业': 'pro',
+        'fast': 'fast',
+        'hd': 'hd',
+        'pro': 'pro'
+    };
+    const modelId = qualityMap[quality] || 'fast';
+    return models.find(m => m.id === modelId);
+}
+
+// 简单密码验证（生产环境建议用 bcrypt）
+function verifyPassword(user, password) {
+    return user.password === password;
+}
+
+// 认证中间件
 function verifyToken(req, res, next) {
     const token = req.headers['x-auth-token'];
     const adminToken = req.headers['x-admin-token'];
 
     // 管理员验证
+    const settings = getSettings();
     if (adminToken === 'admin_token') {
         req.isAdmin = true;
         return next();
@@ -50,8 +161,12 @@ function verifyToken(req, res, next) {
 
     // 普通用户验证
     if (token) {
-        req.userId = token;
-        return next();
+        const users = getUsers();
+        const user = users.find(u => u.id === token);
+        if (user) {
+            req.userId = user.id;
+            req.username = user.username;
+        }
     }
 
     req.userId = null;
@@ -78,19 +193,43 @@ app.post('/api/register', async (req, res) => {
             return res.json({ success: false, message: '用户名至少3位，密码至少6位' });
         }
 
-        const user = await dataService.createUser(username, password);
+        const users = getUsers();
 
-        // 注册成功后自动登录
+        if (users.find(u => u.username === username)) {
+            return res.json({ success: false, message: '用户名已存在' });
+        }
+
+        // 创建新用户
+        const newUser = {
+            id: 'user_' + Date.now(),
+            username,
+            password,
+            userType: 'experience',
+            freePoints: 10,
+            usageCount: 0,
+            createdAt: new Date().toISOString(),
+            lastLogin: new Date().toISOString()
+        };
+
+        users.push(newUser);
+        saveUsers(users);
+
+        // 更新统计
+        const stats = getStats();
+        stats.totalUsers = (stats.totalUsers || 0) + 1;
+        saveStats(stats);
+
         res.json({
             success: true,
             user: {
-                id: user.id,
-                username: user.username,
-                createdAt: user.createdAt
+                id: newUser.id,
+                username: newUser.username,
+                createdAt: newUser.createdAt
             },
-            token: user.id
+            token: newUser.id
         });
     } catch (error) {
+        console.error('注册错误:', error);
         res.json({ success: false, message: error.message });
     }
 });
@@ -104,22 +243,25 @@ app.post('/api/login', async (req, res) => {
             return res.json({ success: false, message: '请输入用户名和密码' });
         }
 
-        const user = await dataService.findUserByUsername(username);
+        const users = getUsers();
+        const user = users.find(u => u.username === username);
 
         if (!user) {
             return res.json({ success: false, message: '用户不存在' });
         }
 
-        const valid = await dataService.verifyPassword(user, password);
+        const valid = verifyPassword(user, password);
 
         if (!valid) {
             return res.json({ success: false, message: '密码错误' });
         }
 
-        await dataService.updateLastLogin(user.id);
+        // 更新最后登录
+        user.lastLogin = new Date().toISOString();
+        saveUsers(users);
 
         // 检查是否是管理员
-        const settings = dataService.getSettings();
+        const settings = getSettings();
         const isAdmin = settings.admin && settings.admin.username === username;
 
         res.json({
@@ -129,19 +271,20 @@ app.post('/api/login', async (req, res) => {
                 username: user.username,
                 createdAt: user.createdAt,
                 usageCount: user.usageCount || 0,
+                freePoints: user.freePoints || 0,
                 isAdmin
             },
             token: user.id
         });
     } catch (error) {
-        logError('登录错误', error);
+        console.error('登录错误:', error);
         res.json({ success: false, message: '登录失败' });
     }
 });
 
 // 获取风格列表
 app.get('/api/styles', (req, res) => {
-    const settings = dataService.getSettings();
+    const settings = getSettings();
     res.json({
         success: true,
         styles: settings.styles || []
@@ -150,7 +293,7 @@ app.get('/api/styles', (req, res) => {
 
 // 获取模型配置
 app.get('/api/models', (req, res) => {
-    const models = dataService.getModels();
+    const models = getModels();
     res.json({
         success: true,
         models: models.filter(m => m.enabled)
@@ -167,11 +310,11 @@ app.post('/api/draw', async (req, res) => {
         }
 
         if (!quality) {
-            quality = '标准';
+            quality = 'fast';
         }
 
         // 获取对应模型
-        const model = dataService.getModelByQuality(quality);
+        const model = getModelByQuality(quality);
 
         if (!model) {
             return res.json({ success: false, message: '当前画质不可用' });
@@ -182,20 +325,54 @@ app.post('/api/draw', async (req, res) => {
         const stylePrompt = getStylePrompt(style);
         const prompt = `${stylePrompt}, 创意程度${creativityLevel}/10, 室内装修效果图, 高质量渲染`;
 
+        console.log('\n========== 收到绘图请求 ==========');
+        console.log('模型:', model.name);
+        console.log('风格:', style);
+        console.log('创意程度:', creativityLevel);
+        console.log('用户:', userId || 'guest');
+        console.log('=====================================\n');
+
         // 调用 AI 接口
         const result = await callAI(model, image, prompt);
 
         // 保存历史记录
         if (userId) {
-            await dataService.saveHistory(userId, {
-                style,
-                creativity: creativityLevel,
-                quality,
-                prompt,
-                resultUrl: result.url
-            });
+            const users = getUsers();
+            const user = users.find(u => u.id === userId);
+            
+            if (user) {
+                // 保存历史
+                const history = getHistory();
+                history.unshift({
+                    id: Date.now(),
+                    userId: userId,
+                    username: user.username,
+                    style,
+                    creativity: creativityLevel,
+                    quality,
+                    prompt,
+                    resultUrl: result.url,
+                    timestamp: new Date().toISOString()
+                });
+                // 只保留最近 100 条
+                if (history.length > 100) {
+                    history.length = 100;
+                }
+                saveHistory(history);
 
-            await dataService.incrementUsage(userId);
+                // 更新使用次数
+                user.usageCount = (user.usageCount || 0) + 1;
+                saveUsers(users);
+            }
+
+            // 更新统计
+            const stats = getStats();
+            stats.totalGenerations = (stats.totalGenerations || 0) + 1;
+            const today = new Date().toISOString().split('T')[0];
+            if (!stats.dailyStats) stats.dailyStats = {};
+            if (!stats.dailyStats[today]) stats.dailyStats[today] = { generations: 0, users: [] };
+            stats.dailyStats[today].generations = (stats.dailyStats[today].generations || 0) + 1;
+            saveStats(stats);
         }
 
         res.json({
@@ -203,23 +380,25 @@ app.post('/api/draw', async (req, res) => {
             result: result
         });
     } catch (error) {
-        logError('绘图错误', error);
+        console.error('绘图错误:', error);
         res.json({ success: false, message: error.message || '生成失败' });
     }
 });
 
 // 获取历史记录
 app.get('/api/history', verifyToken, async (req, res) => {
-    const userId = req.query.userId;
+    const userId = req.query.userId || req.query.username;
 
     if (!userId) {
         return res.json({ success: false, message: '缺少用户ID' });
     }
 
-    const history = await dataService.getHistory(userId);
+    const history = getHistory();
+    const userHistory = history.filter(h => h.userId === userId || h.username === userId).reverse();
+
     res.json({
         success: true,
-        history
+        history: userHistory
     });
 });
 
@@ -237,18 +416,69 @@ function requireAdmin(req, res, next) {
     next();
 }
 
+// 管理员登录
+app.post('/api/admin/login', async (req, res) => {
+    try {
+        const { password } = req.body;
+        const settings = getSettings();
+
+        if (password === settings.admin.password) {
+            res.json({ success: true, token: 'admin_token' });
+        } else {
+            res.json({ success: false, message: '密码错误' });
+        }
+    } catch (error) {
+        res.json({ success: false, message: error.message });
+    }
+});
+
 // 获取用户列表
 app.get('/api/admin/users', requireAdmin, async (req, res) => {
     try {
-        const users = await dataService.getUsers();
+        const users = getUsers();
+        const stats = getStats();
+        
         const list = users.map(u => ({
             id: u.id,
             username: u.username,
+            userType: u.userType,
+            freePoints: u.freePoints || 0,
+            usageCount: u.usageCount || 0,
             createdAt: u.createdAt,
-            lastLogin: u.lastLogin,
-            usageCount: u.usageCount || 0
+            lastLogin: u.lastLogin
         }));
-        res.json({ success: true, users: list });
+        
+        res.json({ success: true, users: list, stats: stats });
+    } catch (error) {
+        res.json({ success: false, message: error.message });
+    }
+});
+
+// 获取统计数据
+app.get('/api/admin/stats', requireAdmin, async (req, res) => {
+    try {
+        const stats = getStats();
+        res.json({ success: true, stats: stats });
+    } catch (error) {
+        res.json({ success: false, message: error.message });
+    }
+});
+
+// 删除用户
+app.delete('/api/admin/user/:username', requireAdmin, async (req, res) => {
+    try {
+        const { username } = req.params;
+        const users = getUsers();
+        const index = users.findIndex(u => u.username === username);
+
+        if (index === -1) {
+            return res.json({ success: false, message: '用户不存在' });
+        }
+
+        users.splice(index, 1);
+        saveUsers(users);
+
+        res.json({ success: true });
     } catch (error) {
         res.json({ success: false, message: error.message });
     }
@@ -260,7 +490,7 @@ app.put('/api/admin/models/:modelId', requireAdmin, async (req, res) => {
         const { modelId } = req.params;
         const { enabled } = req.body;
 
-        const models = dataService.getModels();
+        const models = getModels();
         const index = models.findIndex(m => m.id === modelId);
 
         if (index === -1) {
@@ -268,40 +498,12 @@ app.put('/api/admin/models/:modelId', requireAdmin, async (req, res) => {
         }
 
         models[index].enabled = enabled;
-        dataService.saveModels(models);
+        fs.writeFileSync(MODELS_FILE, JSON.stringify(models, null, 2));
 
         res.json({ success: true });
     } catch (error) {
         res.json({ success: false, message: error.message });
     }
-});
-
-// ==================== 多智能体接口（Mock）====================
-
-app.post('/api/ai/analyze', async (req, res) => {
-    const { type } = req.body;
-
-    // Mock 数据
-    const suggestions = {
-        ux: [
-            '建议将生成按钮放在更显眼位置',
-            '创意程度滑块可以添加标签说明',
-            '增加图片预览放大功能'
-        ],
-        design: [
-            '推荐使用暖色调提升温馨感',
-            '建议增加不同风格预览对比'
-        ],
-        performance: [
-            '考虑添加图片压缩减少加载时间',
-            '可以增加缓存机制提升速度'
-        ]
-    };
-
-    res.json({
-        success: true,
-        suggestions: suggestions[type] || suggestions.ux
-    });
 });
 
 // ==================== 辅助函数 ====================
@@ -313,7 +515,9 @@ function getStylePrompt(styleId) {
         chinese: '新中式风格，传统元素与现代设计结合',
         luxury: '轻奢风格，金属质感，高端材质',
         industrial: '工业风格，水泥砖墙，粗犷质感',
-        minimalist: '极简主义，大量留白，功能至上'
+        japanese: '日式风格，榻榻米，原木家具',
+        american: '美式风格，舒适宽敞，经典元素',
+        european: '欧式风格，华丽装饰，精致线条'
     };
     return styles[styleId] || '现代简约风格';
 }
@@ -322,6 +526,7 @@ async function callAI(model, imageBase64, prompt) {
     const { endpoint, apiKey, modelId } = model;
 
     try {
+        // 先创建任务
         const response = await fetch(endpoint, {
             method: 'POST',
             headers: {
@@ -330,9 +535,12 @@ async function callAI(model, imageBase64, prompt) {
             },
             body: JSON.stringify({
                 model: modelId,
-                image: imageBase64,
+                urls: [imageBase64], // 支持直接传入 base64 图片
                 prompt: prompt,
-                quality: 'hd'
+                aspectRatio: 'auto',
+                imageSize: '1K',
+                webHook: '-1', // 立即返回 id，使用轮询方式获取结果
+                shutProgress: true
             })
         });
 
@@ -342,16 +550,61 @@ async function callAI(model, imageBase64, prompt) {
         }
 
         const data = await response.json();
+        console.log('AI 响应:', data);
 
-        // 解析返回数据（根据实际API调整）
-        return {
-            url: data.url || data.data?.[0]?.url || '',
-            model: modelId
-        };
+        // 检查是否成功返回 id
+        if (data.code === 0 && data.data && data.data.id) {
+            const taskId = data.data.id;
+            console.log(`任务创建成功, ID: ${taskId}`);
+
+            // 轮询获取结果
+            const result = await pollResult(endpoint, apiKey, taskId);
+            return result;
+        }
+
+        // 如果直接返回了图片
+        if (data.url) {
+            return { url: data.url, model: modelId };
+        }
+
+        throw new Error('AI 返回格式错误');
     } catch (error) {
-        logError('AI调用错误', error);
+        console.error('AI调用错误:', error);
         throw new Error('AI生成失败，请稍后重试');
     }
+}
+
+// 轮询获取结果
+async function pollResult(endpoint, apiKey, taskId, maxAttempts = 60) {
+    const statusUrl = endpoint.replace('/v1/draw/', '/v1/draw/status/');
+
+    for (let i = 0; i < maxAttempts; i++) {
+        await new Promise(resolve => setTimeout(resolve, 2000)); // 2秒轮询一次
+
+        try {
+            const response = await fetch(`${statusUrl}${taskId}`, {
+                headers: {
+                    'Authorization': `Bearer ${apiKey}`
+                }
+            });
+
+            const data = await response.json();
+            console.log(`轮询 ${i + 1}:`, data);
+
+            if (data.code === 0 && data.data) {
+                if (data.data.status === 'success' && data.data.url) {
+                    return { url: data.data.url, model: data.data.model || 'nano-banana' };
+                } else if (data.data.status === 'failed') {
+                    throw new Error(data.data.error || '生成失败');
+                }
+                // status 为 processing 或 pending 时继续轮询
+            }
+        } catch (error) {
+            console.error('轮询错误:', error);
+        }
+    }
+
+    throw new Error('生成超时，请稍后重试');
 }
 
 // 404 处理
@@ -362,7 +615,7 @@ app.use((req, res) => {
 // 启动服务器
 app.listen(PORT, () => {
     console.log('========================================');
-    console.log('   子问设计助手 V2');
+    console.log('   子问设计助手');
     console.log('========================================');
     console.log(`端口: ${PORT}`);
     console.log(`访问: http://localhost:${PORT}`);

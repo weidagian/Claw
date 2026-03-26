@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<<<<<<< HEAD
     <title>子问设计助手 - 室内设计师的谈单神器</title>
     <link rel="stylesheet" href="css/style.css">
     <style>
@@ -126,5 +127,60 @@
             document.getElementById('loginLink').href = 'work.html';
         }
     </script>
+=======
+    <title>子问设计助手 - 登录/注册</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container auth-container">
+        <div class="logo-section">
+            <h1>子问设计助手</h1>
+            <p class="subtitle">AI 驱动的智能设计工具</p>
+        </div>
+
+        <div class="auth-tabs">
+            <button class="tab-btn active" data-tab="login">登录</button>
+            <button class="tab-btn" data-tab="register">注册</button>
+        </div>
+
+        <!-- 登录表单 -->
+        <form id="loginForm" class="auth-form active">
+            <div class="form-group">
+                <label for="loginUsername">用户名</label>
+                <input type="text" id="loginUsername" required placeholder="请输入用户名">
+            </div>
+            <div class="form-group">
+                <label for="loginPassword">密码</label>
+                <input type="password" id="loginPassword" required placeholder="请输入密码">
+            </div>
+            <button type="submit" class="btn btn-primary btn-full">登录</button>
+            <div id="loginError" class="error-message"></div>
+        </form>
+
+        <!-- 注册表单 -->
+        <form id="registerForm" class="auth-form">
+            <div class="form-group">
+                <label for="registerUsername">用户名</label>
+                <input type="text" id="registerUsername" required placeholder="请输入用户名（至少3位）" minlength="3">
+            </div>
+            <div class="form-group">
+                <label for="registerPassword">密码</label>
+                <input type="password" id="registerPassword" required placeholder="请输入密码（至少6位）" minlength="6">
+            </div>
+            <div class="form-group">
+                <label for="confirmPassword">确认密码</label>
+                <input type="password" id="confirmPassword" required placeholder="请再次输入密码" minlength="6">
+            </div>
+            <button type="submit" class="btn btn-primary btn-full">注册</button>
+            <div id="registerError" class="error-message"></div>
+        </form>
+
+        <div class="guest-link">
+            <a href="work.html?guest=1">暂不登录，直接体验 &gt;</a>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+>>>>>>> 3c5a4d43196a713ba5b7dfb06c76062e2c2d4474
 </body>
 </html>

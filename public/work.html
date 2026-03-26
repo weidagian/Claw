@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<<<<<<< HEAD
     <title>工作台 - 子问设计助手</title>
     <link rel="stylesheet" href="css/style.css">
     <style>
@@ -517,5 +518,125 @@
 
         init();
     </script>
+=======
+    <title>子问设计助手 - 工作台</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- 顶部导航 -->
+    <header class="header">
+        <div class="container">
+            <div class="header-left">
+                <h1 class="logo">子问设计助手</h1>
+            </div>
+            <div class="header-right">
+                <span id="userInfo" class="user-info"></span>
+                <button id="logoutBtn" class="btn btn-text">退出</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主内容区 -->
+    <main class="main-content">
+        <div class="container">
+            <!-- 上传区域 -->
+            <section class="upload-section">
+                <div class="upload-area" id="uploadArea">
+                    <input type="file" id="fileInput" accept="image/*" style="display: none;">
+                    <div class="upload-placeholder">
+                        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M24 4V20M24 20L16 12M24 20L32 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M40 20V36C40 38.2091 38.2091 40 36 40H12C9.79086 40 8 38.2091 8 36V20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        <p>点击上传或拖拽图片到此处</p>
+                        <p class="hint">支持 JPG、PNG 格式</p>
+                    </div>
+                    <div class="upload-preview" id="uploadPreview" style="display: none;">
+                        <img id="previewImage" src="" alt="预览">
+                        <button class="btn-remove" id="removeImage">×</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 参数设置 -->
+            <section class="options-section">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>设计风格</label>
+                        <select id="styleSelect" class="select">
+                            <option value="modern">现代简约</option>
+                            <option value="nordic">北欧风格</option>
+                            <option value="chinese">新中式</option>
+                            <option value="luxury">轻奢风格</option>
+                            <option value="industrial">工业风</option>
+                            <option value="japanese">日式风格</option>
+                            <option value="american">美式风格</option>
+                            <option value="european">欧式风格</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>画质选择</label>
+                        <select id="qualitySelect" class="select">
+                            <option value="fast">标准（快速）</option>
+                            <option value="hd">高清</option>
+                            <option value="pro">专业</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>创意程度</label>
+                    <div class="slider-container">
+                        <input type="range" id="creativitySlider" min="1" max="10" value="5" class="slider">
+                        <div class="slider-labels">
+                            <span>严格</span>
+                            <span id="creativityValue" class="current-value">5</span>
+                            <span>自由</span>
+                        </div>
+                    </div>
+                    <p class="hint-text" id="creativityHint">平衡模式：保持线稿结构，适度添加装饰</p>
+                </div>
+            </section>
+
+            <!-- 生成按钮 -->
+            <section class="action-section">
+                <button id="generateBtn" class="btn btn-primary btn-large btn-full">
+                    <span class="btn-text">开始生成</span>
+                    <span class="btn-loading" style="display: none;">生成中...</span>
+                </button>
+            </section>
+
+            <!-- 结果展示 -->
+            <section id="resultSection" class="result-section" style="display: none;">
+                <div class="result-card">
+                    <div class="result-header">
+                        <h3>生成结果</h3>
+                        <div class="result-actions">
+                            <button id="downloadBtn" class="btn btn-secondary">下载</button>
+                            <button id="shareBtn" class="btn btn-secondary">分享</button>
+                        </div>
+                    </div>
+                    <div class="result-image">
+                        <img id="resultImage" src="" alt="生成结果">
+                    </div>
+                </div>
+            </section>
+
+            <!-- 历史记录 -->
+            <section id="historySection" class="history-section">
+                <div class="section-header">
+                    <h3>历史记录</h3>
+                    <span id="historyCount" class="count-badge"></span>
+                </div>
+                <div id="historyList" class="history-list">
+                    <p class="empty-text">暂无历史记录</p>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script src="js/config.js"></script>
+    <script src="js/work.js"></script>
+>>>>>>> 3c5a4d43196a713ba5b7dfb06c76062e2c2d4474
 </body>
 </html>
