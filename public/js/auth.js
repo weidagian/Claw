@@ -35,8 +35,11 @@ document.addEventListener('DOMContentLoaded', function() {
             const result = await response.json();
             
             if (result.success) {
-                // 登录成功，保存用户信息
-                localStorage.setItem('user', JSON.stringify(result.user));
+                // 登录成功，保存用户信息（确保存储 username）
+                const userData = {
+                    username: result.user.username
+                };
+                localStorage.setItem('user', JSON.stringify(userData));
                 
                 alert('登录成功');
                 window.location.href = 'work-v3.html';

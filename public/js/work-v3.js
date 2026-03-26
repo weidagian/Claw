@@ -65,14 +65,16 @@ function checkUserLogin() {
     
     // 如果没有用户信息，跳转到登录页
     if (!user) {
-        // 检查是否是通过“直接体验”进入的（URL 中包含 ?demo=1）
+        // 检查是否是通过“直接体验”进入的（URL 中包含 ?guest=true）
         const urlParams = new URLSearchParams(window.location.search);
-        const isDemo = urlParams.get('demo') === '1';
+        const isGuest = urlParams.get('guest') === 'true';
         
-        if (!isDemo) {
+        if (!isGuest) {
             window.location.href = 'login.html';
+            return false;
         }
     }
+    return true;
 }
 
 // 模式切换
