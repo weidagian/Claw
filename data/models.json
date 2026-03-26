@@ -1,0 +1,38 @@
+[
+  {
+    "id": "gpt-image-1.5",
+    "name": "标准模型",
+    "modelId": "gpt-image-1.5",
+    "endpoint": "https://grsai.dakka.com.cn/v1/images/generations",
+    "apiKey": "sk-e8f308bbe3d94ab68cdb3b81657bbddc",
+    "supportsQuality": ["标准"],
+    "enabled": true
+  },
+  {
+    "id": "nano-banana-fast",
+    "name": "快速模型",
+    "modelId": "nano-banana-fast",
+    "endpoint": "https://grsai.dakka.com.cn/v1/images/generations",
+    "apiKey": "sk-e8f308bbe3d94ab68cdb3b81657bbddc",
+    "supportsQuality": ["标准"],
+    "enabled": true
+  },
+  {
+    "id": "nano-banana-pro",
+    "name": "高清模型",
+    "modelId": "nano-banana-pro",
+    "endpoint": "https://grsai.dakka.com.cn/v1/images/generations",
+    "apiKey": "sk-e8f308bbe3d94ab68cdb3b81657bbddc",
+    "supportsQuality": ["高清"],
+    "enabled": true
+  },
+  {
+    "id": "nano-banana-pro-4k-vip",
+    "name": "专业模型",
+    "modelId": "nano-banana-pro-4k-vip",
+    "endpoint": "https://grsai.dakka.com.cn/v1/images/generations",
+    "apiKey": "sk-e8f308bbe3d94ab68cdb3b81657bbddc",
+    "supportsQuality": ["专业"],
+    "enabled": true
+  }
+]

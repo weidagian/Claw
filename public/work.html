@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>工作台 - 子问设计助手</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .work-container {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 1.5rem;
+            padding: 1.5rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        @media (max-width: 900px) {
+            .work-container {
+                grid-template-columns: 1fr;
+            }
+        }
+        .main-panel {
+            background: #fff;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        }
+        .upload-area {
+            border: 2px dashed #e2e8f0;
+            border-radius: 12px;
+            padding: 3rem 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 1.5rem;
+        }
+        .upload-area:hover {
+            border-color: #2563eb;
+            background: #f0f9ff;
+        }
+        .upload-area.dragover {
+            border-color: #2563eb;
+            background: #f0f9ff;
+        }
+        .upload-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        .upload-text {
+            color: #64748b;
+        }
+        .upload-text strong {
+            color: #2563eb;
+        }
+        #previewImage {
+            max-width: 100%;
+            max-height: 400px;
+            border-radius: 8px;
+            display: none;
+        }
+        .settings {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .setting-item label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #374151;
+        }
+        .setting-item select,
+        .setting-item input[type="range"] {
+            width: 100%;
+        }
+        .setting-item select {
+            padding: 0.625rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            background: #fff;
+        }
+        .creativity-value {
+            text-align: center;
+            font-size: 0.875rem;
+            color: #64748b;
+            margin-top: 0.25rem;
+        }
+        .generate-btn {
+            width: 100%;
+            padding: 1rem;
+            font-size: 1.1rem;
+        }
+        .result-area {
+            margin-top: 1.5rem;
+            text-align: center;
+        }
+        .result-area img {
+            max-width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .sidebar-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 1rem;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        }
+        .sidebar-title {
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .history-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .history-item {
+            display: flex;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .history-item:hover {
+            background: #f8fafc;
+        }
+        .history-thumb {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 6px;
+            background: #e2e8f0;
+        }
+        .history-info {
+            flex: 1;
+            font-size: 0.8rem;
+            color: #64748b;
+        }
+        .history-info .time {
+            font-size: 0.75rem;
+        }
+        .ai-tip-btn {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #8b5cf6, #6366f1);
+            color: #fff;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+            transition: transform 0.2s;
+        }
+        .ai-tip-btn:hover {
+            transform: scale(1.1);
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal.show {
+            display: flex;
+        }
+        .modal-content {
+            background: #fff;
+            padding: 1.5rem;
+            border-radius: 12px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        .suggestion-item {
+            padding: 0.75rem;
+            background: #f8fafc;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container header-content">
+            <a href="index.html" class="logo">
+                <div class="logo-icon">Z</div>
+                <span>子问设计助手</span>
+            </a>
+            <nav class="nav">
+                <span id="userDisplay" style="margin-right: 1rem;"></span>
+                <a href="index.html" class="nav-link" onclick="logout()">退出</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="work-container">
+        <div class="main-panel">
+            <!-- 上传区域 -->
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">📁</div>
+                <p class="upload-text">
+                    <strong>点击上传</strong> 或拖拽图片到这里<br>
+                    支持 JPG、PNG 格式
+                </p>
+                <input type="file" id="fileInput" accept="image/*" style="display: none;">
+            </div>
+            <img id="previewImage" alt="预览">
+
+            <!-- 设置区域 -->
+            <div class="settings">
+                <div class="setting-item">
+                    <label>风格选择</label>
+                    <select id="styleSelect">
+                        <option value="">加载中...</option>
+                    </select>
+                </div>
+                <div class="setting-item">
+                    <label>画质</label>
+                    <select id="qualitySelect">
+                        <option value="标准">标准</option>
+                        <option value="高清">高清</option>
+                        <option value="专业">专业</option>
+                    </select>
+                </div>
+                <div class="setting-item">
+                    <label>创意程度</label>
+                    <input type="range" id="creativity" min="0" max="10" value="5">
+                    <div class="creativity-value" id="creativityValue">5/10</div>
+                </div>
+            </div>
+
+            <button class="btn btn-primary generate-btn" id="generateBtn" onclick="generate()">
+                生成效果图
+            </button>
+
+            <!-- 结果区域 -->
+            <div class="result-area" id="resultArea" style="display: none;">
+                <h3 style="margin-bottom: 1rem;">生成结果</h3>
+                <img id="resultImage" alt="效果图">
+                <div style="margin-top: 1rem;">
+                    <button class="btn btn-secondary" onclick="downloadResult()">下载图片</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 侧边栏 -->
+        <div class="sidebar">
+            <div class="sidebar-card">
+                <div class="sidebar-title">
+                    <span>使用统计</span>
+                </div>
+                <div id="usageStats">
+                    <p>使用次数: <strong id="usageCount">0</strong> 次</p>
+                </div>
+            </div>
+
+            <div class="sidebar-card" style="flex: 1;">
+                <div class="sidebar-title">
+                    <span>历史记录</span>
+                    <button class="btn btn-sm" onclick="loadHistory()">刷新</button>
+                </div>
+                <div class="history-list" id="historyList">
+                    <p style="color: #94a3b8; text-align: center; padding: 1rem;">暂无记录</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- AI 建议弹窗 -->
+    <div class="modal" id="aiModal">
+        <div class="modal-content">
+            <div class="modal-title">💡 AI 体验建议</div>
+            <div id="suggestionList"></div>
+            <button class="btn btn-secondary" style="margin-top: 1rem; width: 100%;" onclick="closeModal()">关闭</button>
+        </div>
+    </div>
+
+    <button class="ai-tip-btn" onclick="getAISuggestions()" title="AI 建议">💡</button>
+
+    <script>
+        let currentImage = null;
+        let userId = null;
+        let isGuest = false;
+
+        // 初始化
+        async function init() {
+            // 检查 URL 参数
+            const urlParams = new URLSearchParams(window.location.search);
+            isGuest = urlParams.get('guest') === '1';
+
+            // 获取用户信息
+            const token = localStorage.getItem('token');
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+
+            if (!token && !isGuest) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            if (user.id) {
+                userId = user.id;
+                document.getElementById('userDisplay').textContent = user.username;
+                document.getElementById('usageCount').textContent = user.usageCount || 0;
+                loadHistory();
+            }
+
+            // 加载风格列表
+            loadStyles();
+
+            // 创意程度滑块
+            document.getElementById('creativity').addEventListener('input', (e) => {
+                document.getElementById('creativityValue').textContent = e.target.value + '/10';
+            });
+        }
+
+        // 加载风格列表
+        async function loadStyles() {
+            try {
+                const res = await fetch('/api/styles');
+                const data = await res.json();
+
+                if (data.success) {
+                    const select = document.getElementById('styleSelect');
+                    select.innerHTML = data.styles.map(s =>
+                        `<option value="${s.id}">${s.name}</option>`
+                    ).join('');
+                }
+            } catch (err) {
+                console.error('加载风格失败:', err);
+            }
+        }
+
+        // 上传处理
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+
+        uploadArea.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', handleFile);
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            if (e.dataTransfer.files.length) {
+                handleFile({ target: { files: e.dataTransfer.files } });
+            }
+        });
+
+        function handleFile(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                currentImage = event.target.result;
+                document.getElementById('previewImage').src = currentImage;
+                document.getElementById('previewImage').style.display = 'block';
+                uploadArea.style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // 生成图片
+        async function generate() {
+            if (!currentImage) {
+                alert('请先上传图片');
+                return;
+            }
+
+            const style = document.getElementById('styleSelect').value;
+            const quality = document.getElementById('qualitySelect').value;
+            const creativity = document.getElementById('creativity').value;
+
+            const btn = document.getElementById('generateBtn');
+            btn.disabled = true;
+            btn.textContent = '生成中...';
+
+            try {
+                const res = await fetch('/api/draw', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        image: currentImage,
+                        style,
+                        quality,
+                        creativity,
+                        userId
+                    })
+                });
+
+                const data = await res.json();
+
+                if (data.success) {
+                    document.getElementById('resultImage').src = data.result.url;
+                    document.getElementById('resultArea').style.display = 'block';
+
+                    // 更新使用次数
+                    if (userId) {
+                        const user = JSON.parse(localStorage.getItem('user') || '{}');
+                        user.usageCount = (user.usageCount || 0) + 1;
+                        localStorage.setItem('user', JSON.stringify(user));
+                        document.getElementById('usageCount').textContent = user.usageCount;
+                        loadHistory();
+                    }
+                } else {
+                    alert(data.message || '生成失败');
+                }
+            } catch (err) {
+                alert('生成失败，请重试');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '生成效果图';
+            }
+        }
+
+        // 下载结果
+        function downloadResult() {
+            const img = document.getElementById('resultImage');
+            const link = document.createElement('a');
+            link.href = img.src;
+            link.download = 'ziwen-design-' + Date.now() + '.jpg';
+            link.click();
+        }
+
+        // 加载历史记录
+        async function loadHistory() {
+            if (!userId) return;
+
+            try {
+                const res = await fetch(`/api/history?userId=${userId}`);
+                const data = await res.json();
+
+                if (data.success && data.history.length) {
+                    const list = document.getElementById('historyList');
+                    list.innerHTML = data.history.slice(0, 10).map(h => `
+                        <div class="history-item" onclick="showHistory('${h.resultUrl}')">
+                            <img class="history-thumb" src="${h.resultUrl}" onerror="this.style.display='none'">
+                            <div class="history-info">
+                                <div>${h.style} - ${h.quality}</div>
+                                <div class="time">${new Date(h.createdAt).toLocaleString()}</div>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            } catch (err) {
+                console.error('加载历史失败:', err);
+            }
+        }
+
+        function showHistory(url) {
+            document.getElementById('resultImage').src = url;
+            document.getElementById('resultArea').style.display = 'block';
+        }
+
+        // AI 建议
+        async function getAISuggestions() {
+            try {
+                const res = await fetch('/api/ai/analyze', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type: 'ux' })
+                });
+
+                const data = await res.json();
+
+                if (data.success) {
+                    document.getElementById('suggestionList').innerHTML = data.suggestions.map(s =>
+                        `<div class="suggestion-item">${s}</div>`
+                    ).join('');
+                    document.getElementById('aiModal').classList.add('show');
+                }
+            } catch (err) {
+                alert('获取建议失败');
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('aiModal').classList.remove('show');
+        }
+
+        // 退出登录
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = 'index.html';
+        }
+
+        init();
+    </script>
+</body>
+</html>

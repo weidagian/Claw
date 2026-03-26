@@ -1,0 +1,18 @@
+{
+  "admin": {
+    "username": "admin",
+    "passwordHash": "$2b$10$xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+  },
+  "styles": [
+    { "id": "modern", "name": "现代简约", "description": "简洁线条、低饱和度配色" },
+    { "id": "nordic", "name": "北欧风格", "description": "自然光线、木质元素" },
+    { "id": "chinese", "name": "新中式", "description": "传统元素与现代设计结合" },
+    { "id": "luxury", "name": "轻奢风", "description": "金属质感、高端材质" },
+    { "id": "industrial", "name": "工业风", "description": "水泥、砖墙、粗犷质感" },
+    { "id": "minimalist", "name": "极简主义", "description": "大量留白、功能至上" }
+  ],
+  "defaultConfig": {
+    "creativity": 5,
+    "quality": "standard"
+  }
+}
