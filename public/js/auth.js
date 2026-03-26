@@ -26,23 +26,26 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         try {
-            const result = await callCloudFunction('login', { username, password });
+            const response = await fetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+            
+            const result = await response.json();
             
             if (result.success) {
                 // 登录成功，保存用户信息
-                localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(result.user));
-                localStorage.setItem(STORAGE_KEYS.USERNAME, username);
-                localStorage.setItem(STORAGE_KEYS.USED_TIMES, result.user.usedTimes || 0);
+                localStorage.setItem('user', JSON.stringify(result.user));
                 
                 alert('登录成功');
-                window.location.href = 'work.html';
+                window.location.href = 'work-v3.html';
             } else {
                 alert(result.message || '登录失败');
             }
         } catch (error) {
             console.error('登录失败:', error);
-            // 本地测试模式
-            localTestLogin(username);
+            alert('登录失败，请检查网络连接');
         }
     }
     
@@ -76,18 +79,26 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         try {
-            const result = await callCloudFunction('register', { username, password });
+            const response = await fetch('/api/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+            
+            const result = await response.json();
             
             if (result.success) {
-                alert('注册成功，请登录');
-                window.location.href = 'login.html';
+                // 注册成功，直接登录
+                localStorage.setItem('user', JSON.stringify(result.user));
+                
+                alert('注册成功');
+                window.location.href = 'work-v3.html';
             } else {
                 alert(result.message || '注册失败');
             }
         } catch (error) {
             console.error('注册失败:', error);
-            // 本地测试模式
-            localTestRegister(username, password);
+            alert('注册失败，请检查网络连接');
         }
     }
     

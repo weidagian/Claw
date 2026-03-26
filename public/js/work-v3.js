@@ -44,6 +44,9 @@ const styles = CONFIG.STYLES || [
 
 // 初始化
 document.addEventListener('DOMContentLoaded', () => {
+    // 检查用户登录状态
+    checkUserLogin();
+    
     initModeToggle();
     initStyleSelector();
     initQualitySelector();
@@ -55,6 +58,22 @@ document.addEventListener('DOMContentLoaded', () => {
     loadHistory();
     updateRemainingTimes();
 });
+
+// 检查用户登录状态
+function checkUserLogin() {
+    const user = JSON.parse(localStorage.getItem('user') || 'null');
+    
+    // 如果没有用户信息，跳转到登录页
+    if (!user) {
+        // 检查是否是通过“直接体验”进入的（URL 中包含 ?demo=1）
+        const urlParams = new URLSearchParams(window.location.search);
+        const isDemo = urlParams.get('demo') === '1';
+        
+        if (!isDemo) {
+            window.location.href = 'login.html';
+        }
+    }
+}
 
 // 模式切换
 function initModeToggle() {
