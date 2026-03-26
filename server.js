@@ -57,7 +57,7 @@ function initDataFiles() {
     }
     if (!fs.existsSync(SETTINGS_FILE)) {
         fs.writeFileSync(SETTINGS_FILE, JSON.stringify({
-            admin: { username: 'admin', password: 'ziwen2024' },
+            admin: { username: 'admin', password: 'ziwen2026' },
             styles: [
                 { id: 'modern', name: '现代简约' },
                 { id: 'nordic', name: '北欧风格' },
@@ -123,7 +123,7 @@ function getSettings() {
     try {
         return JSON.parse(fs.readFileSync(SETTINGS_FILE, 'utf8'));
     } catch {
-        return { admin: { username: 'admin', password: 'ziwen2024' }, styles: [] };
+        return { admin: { username: 'admin', password: 'ziwen2026' }, styles: [] };
     }
 }
 
