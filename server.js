@@ -17,35 +17,11 @@ const AI_CONFIG = {
     }
 };
 
-// 飞书Webhook配置（用户反馈通知）
-// TODO: 请替换为你的飞书机器人Webhook地址，格式如：https://open.feishu.cn/open-apis/bot/v2/hook/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
-const FEISHU_WEBHOOK = '';
-
-// 发送飞书消息
-async function sendFeishuNotification(message) {
-    if (!FEISHU_WEBHOOK.includes('xxxxxxxx')) {
-        try {
-            const response = await fetch(FEISHU_WEBHOOK, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    msg_type: 'text',
-                    content: { text: message }
-                })
-            });
-            return response.ok;
-        } catch (e) {
-            console.error('飞书通知失败:', e.message);
-        }
-    }
-    return false;
-}
-
 // 数据存储路径
 const DATA_DIR = path.join(__dirname, 'data');
 const USERS_FILE = path.join(DATA_DIR, 'users.json');
 const STATS_FILE = path.join(DATA_DIR, 'stats.json');
-const FEEDBACKS_FILE = path.join(DATA_DIR, 'feedbacks.json');
+const HISTORY_FILE = path.join(DATA_DIR, 'history.json');
 
 // 确保数据目录存在
 if (!fs.existsSync(DATA_DIR)) {
@@ -61,13 +37,12 @@ function initDataFiles() {
         fs.writeFileSync(STATS_FILE, JSON.stringify({
             totalUsers: 0,
             totalGenerations: 0,
-            totalRevenue: 0,
             dailyStats: {},
             userStats: {}
         }, null, 2));
     }
-    if (!fs.existsSync(FEEDBACKS_FILE)) {
-        fs.writeFileSync(FEEDBACKS_FILE, JSON.stringify([], null, 2));
+    if (!fs.existsSync(HISTORY_FILE)) {
+        fs.writeFileSync(HISTORY_FILE, JSON.stringify([], null, 2));
     }
 }
 
@@ -101,21 +76,21 @@ function saveStats(stats) {
     fs.writeFileSync(STATS_FILE, JSON.stringify(stats, null, 2));
 }
 
-// 读取反馈数据
-function getFeedbacks() {
+// 读取历史记录
+function getHistory() {
     try {
-        return JSON.parse(fs.readFileSync(FEEDBACKS_FILE, 'utf8'));
+        return JSON.parse(fs.readFileSync(HISTORY_FILE, 'utf8'));
     } catch {
         return [];
     }
 }
 
-// 保存反馈数据
-function saveFeedbacks(feedbacks) {
-    fs.writeFileSync(FEEDBACKS_FILE, JSON.stringify(feedbacks, null, 2));
+// 保存历史记录
+function saveHistory(history) {
+    fs.writeFileSync(HISTORY_FILE, JSON.stringify(history, null, 2));
 }
 
-// 空间提示词模板
+// 空间提示词模板（简化版）
 const SPACE_PROMPTS = {
     living: '客厅空间效果图，沙发、电视背景墙、茶几、灯具、窗帘、装饰画，营造温馨舒适的会客空间',
     master: '主卧室效果图，床、床头柜、衣柜、灯具、窗帘、背景墙，营造温馨浪漫的睡眠空间',
@@ -296,29 +271,34 @@ async function handleAPI(req, res) {
                     const err = await response.json().catch(() => ({}));
                     throw new Error(err.message || `API 请求失败: ${response.status}`);
                 }
-                
+
                 const data = await response.json();
-                
+
                 if (data.choices && data.choices[0] && data.choices[0].message) {
                     const content = data.choices[0].message.content;
-                    
+
                     if (typeof content === 'string') {
                         const imgMatch = content.match(/data:image\/(\w+);base64,([A-Za-z0-9+/=]+)/);
                         if (imgMatch) {
                             const imgData = `data:image/${imgMatch[1]};base64,${imgMatch[2]}`;
-                            
+
                             // 更新统计数据
                             updateStats(userId, model, 1);
-                            
+
+                            // 保存历史记录
+                            if (userId && userId !== 'guest') {
+                                saveHistoryRecord(userId, imgData, style, quality, creativity);
+                            }
+
                             res.writeHead(200, { 'Content-Type': 'application/json' });
                             res.end(JSON.stringify({ success: true, image: imgData }));
                             return;
                         }
                     }
                 }
-                
+
                 res.writeHead(200, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ success: true, message: '生成完成，但未返回图片数据' }));
+                res.end(JSON.stringify({ success: false, message: '生成完成，但未返回图片数据' }));
                 
             } catch (error) {
                 console.error('绘图失败:', error);
@@ -328,88 +308,26 @@ async function handleAPI(req, res) {
         });
         return;
     }
-    
-    // 用户反馈
-    if (query === '/api/feedback' && req.method === 'POST') {
-        let body = '';
-        req.on('data', chunk => body += chunk);
-        req.on('end', () => {
-            try {
-                const { type, content, contact, username } = JSON.parse(body);
-                const feedbacks = getFeedbacks();
-                
-                const newFeedback = {
-                    id: Date.now(),
-                    username: username || '匿名',
-                    type: type || 'general',
-                    content: content,
-                    contact: contact || '',
-                    createTime: new Date().toISOString(),
-                    status: 'pending' // pending, viewed, resolved
-                };
-                
-                feedbacks.push(newFeedback);
-                saveFeedbacks(feedbacks);
-                
-                // 发送飞书通知
-                const notifyMsg = `📝 新反馈提醒\n用户: ${newFeedback.username}\n类型: ${newFeedback.type}\n内容: ${newFeedback.content.substring(0, 100)}...`;
-                sendFeishuNotification(notifyMsg);
-                
-                res.writeHead(200, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ success: true, message: '反馈提交成功' }));
-            } catch (error) {
-                res.writeHead(500, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ success: false, message: error.message }));
-            }
-        });
-        return;
-    }
-    
-    // 获取反馈列表（管理员）
-    if (query === '/api/admin/feedbacks' && req.method === 'GET') {
-        const isAdmin = checkAdminAuth(req);
-        if (!isAdmin) {
-            res.writeHead(401, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ success: false, message: '未授权' }));
+
+    // 获取历史记录
+    if (query === '/api/history' && req.method === 'GET') {
+        const url = new URL(req.url, `http://${req.headers.host}`);
+        const username = url.searchParams.get('username');
+
+        if (!username || username === 'guest') {
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ success: true, history: [] }));
             return;
         }
-        
-        const feedbacks = getFeedbacks();
+
+        const history = getHistory();
+        const userHistory = history.filter(h => h.username === username).reverse();
+
         res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ success: true, feedbacks: feedbacks.reverse() }));
+        res.end(JSON.stringify({ success: true, history: userHistory }));
         return;
     }
-    
-    // 更新反馈状态
-    if (query.startsWith('/api/admin/feedback/') && req.method === 'PUT') {
-        const isAdmin = checkAdminAuth(req);
-        if (!isAdmin) {
-            res.writeHead(401, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ success: false, message: '未授权' }));
-            return;
-        }
-        
-        const id = parseInt(query.split('/').pop());
-        const body = '';
-        req.on('data', chunk => body += chunk);
-        req.on('end', () => {
-            try {
-                const { status } = JSON.parse(body);
-                const feedbacks = getFeedbacks();
-                const index = feedbacks.findIndex(f => f.id === id);
-                if (index !== -1) {
-                    feedbacks[index].status = status;
-                    saveFeedbacks(feedbacks);
-                }
-                res.writeHead(200, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ success: true }));
-            } catch (error) {
-                res.writeHead(500, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ success: false, message: error.message }));
-            }
-        });
-        return;
-    }
+
     
     // 用户登录
     if (query === '/api/login' && req.method === 'POST') {
@@ -501,70 +419,7 @@ async function handleAPI(req, res) {
         });
         return;
     }
-    
-    // 获取统计数据（管理员）
-    if (query === '/api/stats' && req.method === 'GET') {
-        const stats = getStats();
-        const users = getUsers();
-        
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ 
-            success: true, 
-            stats,
-            userCount: users.length,
-            users: users.map(u => ({
-                username: u.username,
-                userType: u.userType,
-                freePoints: u.freePoints,
-                bonusPoints: u.bonusPoints,
-                totalUsage: u.totalUsage || 0,
-                createTime: u.createTime,
-                lastLogin: u.lastLogin
-            }))
-        }));
-        return;
-    }
-    
-    // 管理员：更新用户
-    if (query === '/api/admin/updateUser' && req.method === 'POST') {
-        let body = '';
-        req.on('data', chunk => body += chunk);
-        req.on('end', () => {
-            try {
-                const { username, userType, freePoints, bonusPoints, action } = JSON.parse(body);
-                const users = getUsers();
-                const userIndex = users.findIndex(u => u.username === username);
-                
-                if (userIndex === -1) {
-                    res.writeHead(200, { 'Content-Type': 'application/json' });
-                    res.end(JSON.stringify({ success: false, message: '用户不存在' }));
-                    return;
-                }
-                
-                if (action === 'upgrade') {
-                    users[userIndex].userType = userType;
-                    users[userIndex].bonusPoints = (users[userIndex].bonusPoints || 0) + bonusPoints;
-                } else if (action === 'deduct') {
-                    users[userIndex].freePoints = Math.max(0, (users[userIndex].freePoints || 0) - freePoints);
-                    users[userIndex].bonusPoints = Math.max(0, (users[userIndex].bonusPoints || 0) - bonusPoints);
-                } else if (action === 'block') {
-                    users[userIndex].blocked = true;
-                } else if (action === 'unblock') {
-                    users[userIndex].blocked = false;
-                }
-                
-                saveUsers(users);
-                
-                res.writeHead(200, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ success: true }));
-            } catch (error) {
-                res.writeHead(500, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ success: false, message: error.message }));
-            }
-        });
-        return;
-    }
-    
+
     // 404
     res.writeHead(404);
     res.end('API Not Found');
@@ -574,20 +429,20 @@ async function handleAPI(req, res) {
 function updateStats(userId, model, count) {
     const stats = getStats();
     const today = new Date().toISOString().split('T')[0];
-    
+
     stats.totalGenerations += count;
-    
+
     // 每日统计
     if (!stats.dailyStats[today]) {
-        stats.dailyStats[today] = { generations: 0, users: new Set() };
+        stats.dailyStats[today] = { generations: 0, users: [] };
     }
     stats.dailyStats[today].generations += count;
-    
+
     // 用户统计
     if (userId) {
         if (!stats.userStats[userId]) {
-            stats.userStats[userId] = { 
-                totalUsage: 0, 
+            stats.userStats[userId] = {
+                totalUsage: 0,
                 byModel: { fast: 0, hd: 0, pro: 0 },
                 lastActive: today
             };
@@ -595,7 +450,7 @@ function updateStats(userId, model, count) {
         stats.userStats[userId].totalUsage += count;
         stats.userStats[userId].byModel[model] = (stats.userStats[userId].byModel[model] || 0) + count;
         stats.userStats[userId].lastActive = today;
-        
+
         // 更新用户的使用次数
         const users = getUsers();
         const userIndex = users.findIndex(u => u.username === userId);
@@ -604,16 +459,41 @@ function updateStats(userId, model, count) {
             saveUsers(users);
         }
     }
-    
+
     saveStats(stats);
+}
+
+// 保存历史记录
+function saveHistoryRecord(username, image, style, quality, creativity) {
+    const history = getHistory();
+
+    const newRecord = {
+        id: Date.now(),
+        username: username,
+        image: image,
+        style: style,
+        quality: quality,
+        creativity: creativity,
+        timestamp: new Date().toISOString()
+    };
+
+    history.push(newRecord);
+
+    // 只保留最近 100 条
+    if (history.length > 100) {
+        const userRecords = history.filter(h => h.username !== username);
+        const userLatest = history.filter(h => h.username === username).slice(-20);
+        history = [...userRecords, ...userLatest];
+    }
+
+    saveHistory(history);
 }
 
 // 启动服务器
 server.listen(PORT, () => {
     console.log('========================================');
-    console.log('   子问设计助手 - 本地测试服务器');
+    console.log('   子问设计助手 - 服务器');
     console.log('========================================');
     console.log(`本地访问: http://localhost:${PORT}`);
-    console.log('管理后台: http://localhost:8080/admin.html');
     console.log('========================================\n');
 });

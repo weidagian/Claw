@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>开始创作 - 子问设计助手</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* 工作台样式 - 简洁版 */
+        .work-container {
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        /* 移动端 */
+        @media (max-width: 1024px) {
+            .work-container {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            .control-panel {
+                position: static;
+                max-height: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .work-container {
+                gap: 0.5rem;
+            }
+            .control-panel {
+                padding: 1rem;
+            }
+        }
+
+        /* 模式选择 */
+        .mode-selector {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            background: var(--bg);
+            padding: 0.25rem;
+            border-radius: var(--radius-sm);
+        }
+
+        .mode-btn {
+            flex: 1;
+            padding: 0.75rem 0.5rem;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            font-weight: 500;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: center;
+        }
+
+        .mode-btn:hover {
+            color: var(--text);
+            background: var(--primary-light);
+        }
+
+        .mode-btn.active {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        /* 上传区域 */
+        .upload-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .upload-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: var(--text);
+        }
+
+        .upload-area {
+            border: 2px dashed var(--border);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            background: var(--bg);
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary);
+            background: var(--primary-light);
+        }
+
+        .upload-area.has-image {
+            padding: 0;
+            border-style: solid;
+            border-color: var(--primary);
+        }
+
+        .upload-placeholder {
+            pointer-events: none;
+        }
+
+        .upload-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-text {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .upload-subtext {
+            font-size: 0.75rem;
+            color: var(--text-light);
+        }
+
+        .preview-image {
+            width: 100%;
+            height: auto;
+            max-height: 200px;
+            object-fit: contain;
+        }
+
+        /* 设置区域 */
+        .settings-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .setting-group {
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background: var(--bg);
+            border-radius: var(--radius-sm);
+        }
+
+        .setting-item {
+            margin-bottom: 1rem;
+        }
+
+        .setting-item label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text);
+            margin-bottom: 0.5rem;
+        }
+
+        .setting-select {
+            width: 100%;
+            padding: 0.625rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 0.875rem;
+            background: var(--bg-card);
+            color: var(--text);
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748B'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 1rem;
+        }
+
+        .setting-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+
+        /* 创意程度滑块 */
+        .creativity-slider {
+            padding: 0.5rem 0;
+        }
+
+        .slider-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .slider-value {
+            font-weight: 600;
+            color: var(--primary);
+            font-size: 1rem;
+        }
+
+        .slider {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: linear-gradient(to right, var(--success), var(--primary), #8B5CF6);
+            outline: none;
+            -webkit-appearance: none;
+            cursor: pointer;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: var(--bg-card);
+            border: 3px solid var(--primary);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .slider::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+        }
+
+        .creativity-desc {
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--success);
+            margin-top: 0.5rem;
+        }
+
+        /* 空间选择 - 仅平面图模式显示 */
+        .space-grid {
+            display: none; /* 默认隐藏 */
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+        }
+
+        .space-grid.visible {
+            display: grid; /* 仅在平面图模式下显示 */
+        }
+
+        .space-item {
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+            padding: 0.5rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 0.75rem;
+        }
+
+        .space-item:hover {
+            border-color: var(--primary);
+        }
+
+        .space-item.selected {
+            background: var(--primary-light);
+            border-color: var(--primary);
+        }
+
+        .space-item .icon {
+            font-size: 1rem;
+        }
+
+        .space-item .name {
+            font-weight: 500;
+        }
+
+        .space-summary {
+            margin-top: 0.75rem;
+            padding: 0.5rem;
+            background: var(--bg);
+            border-radius: var(--radius-sm);
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            text-align: center;
+        }
+
+        .cost-estimate {
+            color: var(--warning);
+            font-weight: 600;
+            margin-left: 0.5rem;
+        }
+
+        /* 补充说明 */
+        .setting-textarea {
+            width: 100%;
+            padding: 0.625rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 0.875rem;
+            resize: vertical;
+            min-height: 70px;
+            font-family: inherit;
+        }
+
+        .setting-textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+
+        /* 生成按钮 */
+        .generate-btn {
+            width: 100%;
+            padding: 0.875rem;
+            background: linear-gradient(135deg, var(--primary) 0%, #8B5CF6 100%);
+            color: #fff;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .generate-btn:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.35);
+        }
+
+        .generate-btn:disabled {
+            background: var(--border);
+            cursor: not-allowed;
+        }
+
+        .btn-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: rgba(255,255,255,0.3);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--success);
+            transition: width 0.3s;
+            width: 0%;
+        }
+
+        .progress-text {
+            display: block;
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+            opacity: 0.9;
+        }
+
+        /* 使用提示 */
+        .usage-tip {
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 0.75rem;
+            padding: 0.5rem;
+            background: var(--bg);
+            border-radius: var(--radius-sm);
+        }
+
+        .usage-tip .highlight {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        /* 结果面板 */
+        .result-panel {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            min-height: 500px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .result-header h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text);
+            margin: 0;
+        }
+
+        .compare-container {
+            flex: 1;
+            background: var(--bg);
+            border-radius: var(--radius-sm);
+            min-height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: var(--text-light);
+            padding: 2rem;
+        }
+
+        .empty-state svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .empty-state h4 {
+            margin: 0.5rem 0 0.25rem;
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        .empty-state p {
+            margin: 0;
+            font-size: 0.875rem;
+            color: var(--text-light);
+        }
+
+        /* 多图展示 */
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1rem;
+            width: 100%;
+            padding: 1rem;
+        }
+
+        .result-card {
+            background: var(--bg-card);
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+
+        .result-card img {
+            width: 100%;
+            aspect-ratio: 4/3;
+            object-fit: contain;
+            background: var(--bg);
+            cursor: pointer;
+        }
+
+        .result-card .space-tag {
+            padding: 0.5rem 0.75rem;
+            background: var(--primary);
+            color: #fff;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+        }
+
+        /* 结果操作 */
+        .result-actions {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .action-btn {
+            flex: 1;
+            max-width: 150px;
+            padding: 0.625rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            background: var(--bg-card);
+            color: var(--text);
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .action-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: var(--primary-light);
+        }
+
+        .action-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* 历史记录 */
+        .history-section {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .history-notice {
+            font-size: 0.75rem;
+            color: var(--warning);
+            background: #FFFBEB;
+            padding: 0.375rem 0.625rem;
+            border-radius: var(--radius-sm);
+            margin: 0;
+        }
+
+        .history-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 0.75rem;
+        }
+
+        .history-item {
+            position: relative;
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            background: var(--bg);
+            aspect-ratio: 1;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .history-item:hover {
+            transform: scale(1.02);
+        }
+
+        .history-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .history-item .delete-btn {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 22px;
+            height: 22px;
+            background: rgba(0,0,0,0.6);
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .history-item:hover .delete-btn {
+            opacity: 1;
+        }
+
+        .history-empty {
+            grid-column: 1 / -1;
+            text-align: center;
+            color: var(--text-light);
+            padding: 2rem;
+            font-size: 0.875rem;
+        }
+
+        /* 动画 */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .loading .btn-text {
+            animation: pulse 1.5s infinite;
+        }
+
+        /* 平面图模式提示 */
+        .floorplan-hint {
+            background: #FEF3C7;
+            border: 1px solid #F59E0B;
+            border-radius: var(--radius-sm);
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+            font-size: 0.8rem;
+            color: #92400E;
+        }
+
+        .floorplan-hint strong {
+            color: #78350F;
+        }
+
+        .floorplan-hint p {
+            margin: 0.25rem 0;
+        }
+
+        /* 移动端优化 */
+        @media (max-width: 768px) {
+            .mode-selector {
+                flex-direction: column;
+            }
+
+            .space-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .history-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <a href="index.html" class="logo">
+                <div class="logo-icon">Z</div>
+                <div class="logo-text">
+                    <span class="logo-title">子问设计助手</span>
+                    <span class="logo-subtitle">室内设计师的谈单神器</span>
+                </div>
+            </a>
+            <nav class="header-nav">
+                <a href="index.html" class="nav-link">首页</a>
+                <a href="work.html" class="nav-link active">开始创作</a>
+                <a href="help.html" class="nav-link">帮助</a>
+                <a href="center.html" class="nav-link">个人中心</a>
+                <span id="userInfo"></span>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="work-container">
+            <!-- 左侧：控制面板 -->
+            <div class="control-panel">
+                <!-- 模式选择 -->
+                <div class="mode-selector">
+                    <button class="mode-btn active" data-mode="sketch">线稿转效果图</button>
+                    <button class="mode-btn" data-mode="floorplan">平面图生成效果图</button>
+                </div>
+
+                <!-- 上传区域 -->
+                <div class="upload-section">
+                    <h3 class="upload-title" id="uploadTitle">上传线稿图</h3>
+                    <div class="upload-area" id="uploadArea">
+                        <input type="file" id="fileInput" accept="image/*" hidden>
+                        <div class="upload-placeholder" id="uploadPlaceholder">
+                            <div class="upload-icon">📷</div>
+                            <p class="upload-text">点击或拖拽上传图片</p>
+                            <p class="upload-subtext" id="uploadSubtext">上传手绘线稿图</p>
+                        </div>
+                        <img id="previewImage" class="preview-image" hidden>
+                    </div>
+                </div>
+
+                <!-- 基础设置 -->
+                <div class="settings-section">
+                    <div class="setting-group">
+                        <div class="setting-item">
+                            <label>选择风格</label>
+                            <select id="styleSelect" class="setting-select">
+                                <!-- 动态填充 -->
+                            </select>
+                        </div>
+
+                        <div class="setting-item">
+                            <label>画质选择</label>
+                            <select id="modelSelect" class="setting-select">
+                                <option value="fast">快速预览 - 0.5点/张</option>
+                                <option value="hd">高清商用 - 2点/张</option>
+                                <option value="pro">专业极致 - 4点/张</option>
+                            </select>
+                        </div>
+
+                        <div class="setting-item">
+                            <label>创意程度</label>
+                            <div class="creativity-slider">
+                                <div class="slider-labels">
+                                    <span>严格</span>
+                                    <span class="slider-value" id="creativityValue">5</span>
+                                    <span>创意</span>
+                                </div>
+                                <input type="range" id="creativityRange" min="1" max="10" value="5" class="slider">
+                                <div class="creativity-desc" id="creativityDesc">视觉效果最好的平衡点</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 平面图专属设置 -->
+                    <div class="setting-group" id="floorplanGroup" style="display: none;">
+                        <div class="floorplan-hint">
+                            <p><strong>⚠️ 平面图模式说明</strong></p>
+                            <p>平面图生成效果图为实验性功能，效果可能不如线稿转换理想。建议使用线稿模式可获得更好的效果。</p>
+                        </div>
+
+                        <div class="setting-item">
+                            <label>生成空间</label>
+                            <div class="space-grid" id="spaceGrid">
+                                <!-- 动态填充 -->
+                            </div>
+                            <div class="space-summary">
+                                已选 <span id="selectedCount">1</span> 个空间
+                                <span class="cost-estimate" id="costEstimate"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 高级设置 -->
+                    <div class="setting-group">
+                        <div class="setting-item">
+                            <label>补充说明 <span style="font-weight: 400; color: var(--text-light);">(选填)</span></label>
+                            <textarea id="extraPrompt" class="setting-textarea" placeholder="如有特殊需求，请在此补充说明..."></textarea>
+                        </div>
+                    </div>
+
+                    <!-- 生成按钮 -->
+                    <button id="generateBtn" class="generate-btn" disabled>
+                        <div class="btn-content">
+                            <span class="btn-text">开始生成</span>
+                        </div>
+                        <div class="btn-progress" hidden>
+                            <div class="progress-fill" id="progressFill"></div>
+                        </div>
+                        <div class="progress-text" id="progressText" hidden></div>
+                    </button>
+
+                    <!-- 使用提示 -->
+                    <div class="usage-tip" id="usageTip">
+                        您当前剩余 <span class="highlight">10</span> 次免费机会
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧：结果展示 -->
+            <div class="result-panel">
+                <div class="result-header">
+                    <h3>效果图展示</h3>
+                </div>
+
+                <div class="compare-container" id="compareContainer">
+                    <div class="empty-state">
+                        <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                            <circle cx="8.5" cy="8.5" r="1.5"/>
+                            <polyline points="21 15 16 10 5 21"/>
+                        </svg>
+                        <h4>暂无效果图</h4>
+                        <p>上传图片并配置参数后，点击生成按钮</p>
+                    </div>
+                </div>
+
+                <div class="result-actions" id="resultActions" style="display: none;">
+                    <button class="action-btn" id="downloadBtn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                            <polyline points="7 10 12 15 17 10"/>
+                            <line x1="12" y1="15" x2="12" y2="3"/>
+                        </svg>
+                        <span>下载全部</span>
+                    </button>
+                    <button class="action-btn" id="shareBtn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="18" cy="5" r="3"/>
+                            <circle cx="6" cy="12" r="3"/>
+                            <circle cx="18" cy="19" r="3"/>
+                            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+                            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+                        </svg>
+                        <span>分享</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 历史记录 -->
+        <section class="history-section">
+            <div class="history-header">
+                <h3>历史作品</h3>
+                <p class="history-notice">⚠️ 历史记录仅保存在本地，请及时下载</p>
+            </div>
+            <div class="history-grid" id="historyGrid">
+                <!-- 动态填充 -->
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-links">
+                <a href="index.html">首页</a>
+                <a href="work.html">开始创作</a>
+                <a href="help.html">使用帮助</a>
+                <a href="center.html">个人中心</a>
+                <a href="privacy.html">隐私协议</a>
+                <a href="terms.html">服务条款</a>
+                <a href="admin.html">管理后台</a>
+            </div>
+            <p class="footer-copyright">&copy; 2026 子问设计助手 版权所有</p>
+        </div>
+    </footer>
+
+    <script src="js/config.js"></script>
+    <script src="js/work-redesign.js"></script>
+</body>
+</html>

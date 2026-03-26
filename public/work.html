@@ -2,182 +2,123 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>开始创作 - 子问设计助手</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>子问设计助手 - 工作台</title>
     <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/work.css">
 </head>
 <body>
+    <!-- 顶部导航 -->
     <header class="header">
-        <div class="header-content">
-            <a href="index.html" class="logo">
-                <div class="logo-icon">Z</div>
-                <div class="logo-text">
-                    <span class="logo-title">子问设计助手</span>
-                    <span class="logo-subtitle">室内设计师的谈单神器</span>
-                </div>
-            </a>
-            <nav class="header-nav">
-                <a href="index.html" class="nav-link">首页</a>
-                <a href="work.html" class="nav-link active">开始创作</a>
-                <a href="help.html" class="nav-link">帮助</a>
-                <a href="center.html" class="nav-link">个人中心</a>
-                <span id="userInfo"></span>
-            </nav>
+        <div class="container">
+            <div class="header-left">
+                <h1 class="logo">子问设计助手</h1>
+            </div>
+            <div class="header-right">
+                <span id="userInfo" class="user-info"></span>
+                <button id="logoutBtn" class="btn btn-text">退出</button>
+            </div>
         </div>
     </header>
 
+    <!-- 主内容区 -->
     <main class="main-content">
-        <div class="work-container">
-            <!-- 左侧：控制面板 -->
-            <div class="control-panel">
-                <!-- 功能标签页 -->
-                <div class="tabs-container">
-                    <button class="tab-btn active" data-tab="sketch">线稿转效果图</button>
-                    <button class="tab-btn" data-tab="floorplan">平面图生成效果图</button>
-                </div>
-
-                <!-- 上传区域 -->
-                <div class="upload-section">
-                    <h3 id="uploadTitle">上传线稿图</h3>
-                    <div class="upload-area" id="uploadArea">
-                        <input type="file" id="fileInput" accept="image/*" hidden>
-                        <div class="upload-placeholder" id="uploadPlaceholder">
-                            <div class="upload-icon">📷</div>
-                            <p id="uploadHint">点击上传手绘线稿</p>
-                            <p class="upload-hint">支持 JPG、PNG</p>
-                        </div>
-                        <img id="previewImage" class="preview-image" hidden>
+        <div class="container">
+            <!-- 上传区域 -->
+            <section class="upload-section">
+                <div class="upload-area" id="uploadArea">
+                    <input type="file" id="fileInput" accept="image/*" style="display: none;">
+                    <div class="upload-placeholder">
+                        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M24 4V20M24 20L16 12M24 20L32 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M40 20V36C40 38.2091 38.2091 40 36 40H12C9.79086 40 8 38.2091 8 36V20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        <p>点击上传或拖拽图片到此处</p>
+                        <p class="hint">支持 JPG、PNG 格式</p>
+                    </div>
+                    <div class="upload-preview" id="uploadPreview" style="display: none;">
+                        <img id="previewImage" src="" alt="预览">
+                        <button class="btn-remove" id="removeImage">×</button>
                     </div>
                 </div>
+            </section>
 
-                <!-- 设置区域 -->
-                <div class="settings-section">
-                    <!-- 风格选择 -->
-                    <div class="setting-item">
-                        <label>选择风格</label>
-                        <select id="styleSelect" class="setting-select">
-                            <!-- 动态填充 -->
+            <!-- 参数设置 -->
+            <section class="options-section">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>设计风格</label>
+                        <select id="styleSelect" class="select">
+                            <option value="modern">现代简约</option>
+                            <option value="nordic">北欧风格</option>
+                            <option value="chinese">新中式</option>
+                            <option value="luxury">轻奢风格</option>
+                            <option value="industrial">工业风</option>
+                            <option value="japanese">日式风格</option>
+                            <option value="american">美式风格</option>
+                            <option value="european">欧式风格</option>
                         </select>
                     </div>
-
-                    <!-- 画质选择 -->
-                    <div class="setting-item">
+                    <div class="form-group">
                         <label>画质选择</label>
-                        <select id="modelSelect" class="setting-select">
-                            <option value="fast">快速预览 - 0.5点/张</option>
-                            <option value="hd">高清商用 - 2点/张</option>
-                            <option value="pro">专业极致 - 4点/张</option>
+                        <select id="qualitySelect" class="select">
+                            <option value="fast">标准（快速）</option>
+                            <option value="hd">高清</option>
+                            <option value="pro">专业</option>
                         </select>
                     </div>
+                </div>
 
-                    <!-- 创意程度滑块 -->
-                    <div class="setting-item">
-                        <label>创意程度</label>
-                        <div class="creativity-slider">
-                            <div class="slider-labels">
-                                <span>严格</span>
-                                <span id="creativityValue">5</span>
-                                <span>创意</span>
-                            </div>
-                            <input type="range" id="creativityRange" min="1" max="10" value="5" class="slider">
-                            <div class="creativity-desc" id="creativityDesc">视觉效果最好的平衡点</div>
+                <div class="form-group">
+                    <label>创意程度</label>
+                    <div class="slider-container">
+                        <input type="range" id="creativitySlider" min="1" max="10" value="5" class="slider">
+                        <div class="slider-labels">
+                            <span>严格</span>
+                            <span id="creativityValue" class="current-value">5</span>
+                            <span>自由</span>
                         </div>
                     </div>
+                    <p class="hint-text" id="creativityHint">平衡模式：保持线稿结构，适度添加装饰</p>
+                </div>
+            </section>
 
-                    <!-- 平面图模式提示（仅平面图标签显示） -->
-                    <div class="setting-item floorplan-notice hidden" id="floorplanNotice">
-                        <div class="notice-box">
-                            <p>⚠️ <strong>平面图模式说明</strong></p>
-                            <p>平面图生成效果图为实验性功能，效果可能不如线稿转换理想。建议使用线稿模式可获得更好的效果。</p>
+            <!-- 生成按钮 -->
+            <section class="action-section">
+                <button id="generateBtn" class="btn btn-primary btn-large btn-full">
+                    <span class="btn-text">开始生成</span>
+                    <span class="btn-loading" style="display: none;">生成中...</span>
+                </button>
+            </section>
+
+            <!-- 结果展示 -->
+            <section id="resultSection" class="result-section" style="display: none;">
+                <div class="result-card">
+                    <div class="result-header">
+                        <h3>生成结果</h3>
+                        <div class="result-actions">
+                            <button id="downloadBtn" class="btn btn-secondary">下载</button>
+                            <button id="shareBtn" class="btn btn-secondary">分享</button>
                         </div>
                     </div>
-
-                    <!-- 空间选择（多选，仅平面图模式显示）-->
-                    <div class="setting-item hidden" id="spaceSection">
-                        <label>生成空间 <span class="setting-hint">(可多选)</span></label>
-
-                        <!-- 空间列表 -->
-                        <div class="space-grid" id="spaceGrid">
-                            <!-- 动态填充 -->
-                        </div>
-
-                        <!-- 已选数量 -->
-                        <div class="space-count">
-                            已选 <span id="selectedCount">0</span> 个空间
-                            <span class="cost-estimate" id="costEstimate"></span>
-                        </div>
-                    </div>
-
-                    <!-- 补充说明 -->
-                    <div class="setting-item">
-                        <label>补充说明 <span class="optional">(选填)</span></label>
-                        <textarea id="extraPrompt" class="setting-textarea" placeholder="如有特殊需求，请在此补充说明..."></textarea>
-                    </div>
-
-                    <!-- 生成按钮 -->
-                    <button id="generateBtn" class="generate-btn" disabled>
-                        <span class="btn-text">生成效果图</span>
-                        <div class="progress-bar" hidden>
-                            <div class="progress-fill" id="progressFill"></div>
-                        </div>
-                        <div class="progress-text" id="progressText" hidden></div>
-                    </button>
-                    
-                    <!-- 剩余次数提示 -->
-                    <div class="times-tip" id="timesTip">
-                        您当前剩余 <span id="remainingTimes">3</span> 次免费机会
+                    <div class="result-image">
+                        <img id="resultImage" src="" alt="生成结果">
                     </div>
                 </div>
-            </div>
+            </section>
 
-            <!-- 右侧：结果展示 -->
-            <div class="result-panel">
-                <h3>效果图展示</h3>
-                <div class="compare-container" id="compareContainer">
-                    <div class="compare-placeholder">
-                        <p>上传户型图并选择空间后，点击生成</p>
-                    </div>
+            <!-- 历史记录 -->
+            <section id="historySection" class="history-section">
+                <div class="section-header">
+                    <h3>历史记录</h3>
+                    <span id="historyCount" class="count-badge"></span>
                 </div>
-                <div class="result-actions" id="resultActions" hidden>
-                    <button class="action-btn download-btn" id="downloadBtn">
-                        <span>📥</span> 打包下载
-                    </button>
-                    <button class="action-btn share-btn" id="shareBtn">
-                        <span>📤</span> 分享
-                    </button>
+                <div id="historyList" class="history-list">
+                    <p class="empty-text">暂无历史记录</p>
                 </div>
-            </div>
+            </section>
         </div>
-
-        <!-- 历史记录 -->
-        <section class="history-section">
-            <div class="history-header">
-                <h3>历史作品</h3>
-                <p class="history-notice">我们不会保存您的图片，请及时下载保存。历史记录仅保存在您设备的浏览器缓存中。</p>
-            </div>
-            <div class="history-grid" id="historyGrid">
-                <!-- 动态填充 -->
-            </div>
-        </section>
     </main>
 
-    <footer class="footer">
-        <div class="footer-content">
-            <div class="footer-links">
-                <a href="index.html">首页</a>
-                <a href="work.html">开始创作</a>
-                <a href="help.html">使用帮助</a>
-                <a href="center.html">个人中心</a>
-                <a href="privacy.html">隐私协议</a>
-                <a href="terms.html">服务条款</a>
-                <a href="admin.html">管理后台</a>
-            </div>
-            <p class="footer-copyright">&copy; 2026 子问设计助手 版权所有</p>
-        </div>
-    </footer>
-
-    <script src="js/config.js"></script>
-    <script src="js/work.js"></script>
+    <script src="js/app.js"></script>
 </body>
 </html>
