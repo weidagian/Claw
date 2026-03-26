@@ -2,123 +2,185 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>子问设计助手 - 工作台</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>子问设计助手 - AI 室内设计</title>
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <!-- 顶部导航 -->
     <header class="header">
-        <div class="container">
-            <div class="header-left">
-                <h1 class="logo">子问设计助手</h1>
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-home"></i>
+                </div>
+                <div class="logo-text">
+                    <span class="logo-title">子问设计</span>
+                    <span class="logo-subtitle">AI 智能室内设计</span>
+                </div>
             </div>
             <div class="header-right">
                 <span id="userInfo" class="user-info"></span>
-                <button id="logoutBtn" class="btn btn-text">退出</button>
+                <button id="logoutBtn" class="btn-icon" title="退出">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
             </div>
         </div>
     </header>
 
     <!-- 主内容区 -->
     <main class="main-content">
-        <div class="container">
-            <!-- 上传区域 -->
-            <section class="upload-section">
-                <div class="upload-area" id="uploadArea">
-                    <input type="file" id="fileInput" accept="image/*" style="display: none;">
-                    <div class="upload-placeholder">
-                        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M24 4V20M24 20L16 12M24 20L32 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M40 20V36C40 38.2091 38.2091 40 36 40H12C9.79086 40 8 38.2091 8 36V20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                        <p>点击上传或拖拽图片到此处</p>
-                        <p class="hint">支持 JPG、PNG 格式</p>
+        <!-- 上传区域 -->
+        <section class="upload-section">
+            <div class="upload-area" id="uploadArea">
+                <input type="file" id="fileInput" accept="image/*" style="display: none;">
+                <div class="upload-placeholder" id="uploadPlaceholder">
+                    <div class="upload-icon">
+                        <i class="fas fa-cloud-upload-alt"></i>
                     </div>
-                    <div class="upload-preview" id="uploadPreview" style="display: none;">
-                        <img id="previewImage" src="" alt="预览">
-                        <button class="btn-remove" id="removeImage">×</button>
-                    </div>
+                    <p class="upload-text">点击上传或拖拽图片</p>
+                    <p class="upload-hint">支持 JPG、PNG 格式</p>
                 </div>
-            </section>
-
-            <!-- 参数设置 -->
-            <section class="options-section">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>设计风格</label>
-                        <select id="styleSelect" class="select">
-                            <option value="modern">现代简约</option>
-                            <option value="nordic">北欧风格</option>
-                            <option value="chinese">新中式</option>
-                            <option value="luxury">轻奢风格</option>
-                            <option value="industrial">工业风</option>
-                            <option value="japanese">日式风格</option>
-                            <option value="american">美式风格</option>
-                            <option value="european">欧式风格</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>画质选择</label>
-                        <select id="qualitySelect" class="select">
-                            <option value="fast">标准（快速）</option>
-                            <option value="hd">高清</option>
-                            <option value="pro">专业</option>
-                        </select>
-                    </div>
+                <div class="upload-preview" id="uploadPreview" style="display: none;">
+                    <img id="previewImage" src="" alt="预览">
+                    <button class="btn-remove" id="removeImage">
+                        <i class="fas fa-times"></i>
+                    </button>
                 </div>
+            </div>
+        </section>
 
-                <div class="form-group">
-                    <label>创意程度</label>
-                    <div class="slider-container">
-                        <input type="range" id="creativitySlider" min="1" max="10" value="5" class="slider">
-                        <div class="slider-labels">
-                            <span>严格</span>
-                            <span id="creativityValue" class="current-value">5</span>
-                            <span>自由</span>
-                        </div>
-                    </div>
-                    <p class="hint-text" id="creativityHint">平衡模式：保持线稿结构，适度添加装饰</p>
+        <!-- 参数设置 -->
+        <section class="options-section">
+            <!-- 设计风格 -->
+            <div class="option-group">
+                <label class="option-label">
+                    <i class="fas fa-palette"></i>
+                    <span>设计风格</span>
+                </label>
+                <div class="style-grid" id="styleGrid">
+                    <button class="style-btn active" data-style="modern">现代简约</button>
+                    <button class="style-btn" data-style="nordic">北欧风格</button>
+                    <button class="style-btn" data-style="chinese">新中式</button>
+                    <button class="style-btn" data-style="luxury">轻奢风格</button>
+                    <button class="style-btn" data-style="industrial">工业风</button>
+                    <button class="style-btn" data-style="japanese">日式风格</button>
+                    <button class="style-btn" data-style="american">美式风格</button>
+                    <button class="style-btn" data-style="european">欧式风格</button>
                 </div>
-            </section>
+            </div>
 
-            <!-- 生成按钮 -->
-            <section class="action-section">
-                <button id="generateBtn" class="btn btn-primary btn-large btn-full">
-                    <span class="btn-text">开始生成</span>
-                    <span class="btn-loading" style="display: none;">生成中...</span>
+            <!-- 空间类型 -->
+            <div class="option-group">
+                <label class="option-label">
+                    <i class="fas fa-door-open"></i>
+                    <span>空间类型</span>
+                </label>
+                <div class="style-grid" id="spaceGrid">
+                    <button class="style-btn" data-space="living">客厅</button>
+                    <button class="style-btn" data-space="master">主卧</button>
+                    <button class="style-btn" data-space="second">次卧</button>
+                    <button class="style-btn" data-space="dining">餐厅</button>
+                    <button class="style-btn" data-space="kitchen">厨房</button>
+                    <button class="style-btn" data-space="bathroom">卫生间</button>
+                    <button class="style-btn" data-space="study">书房</button>
+                    <button class="style-btn" data-space="balcony">阳台</button>
+                </div>
+            </div>
+
+            <!-- 画质选择 -->
+            <div class="option-group">
+                <label class="option-label">
+                    <i class="fas fa-crown"></i>
+                    <span>画质选择</span>
+                </label>
+                <div class="quality-tabs" id="qualityTabs">
+                    <button class="quality-btn active" data-quality="fast">
+                        <span class="quality-icon"><i class="fas fa-bolt"></i></span>
+                        <span class="quality-name">标准</span>
+                    </button>
+                    <button class="quality-btn" data-quality="hd">
+                        <span class="quality-icon"><i class="fas fa-star"></i></span>
+                        <span class="quality-name">高清</span>
+                    </button>
+                    <button class="quality-btn" data-quality="pro">
+                        <span class="quality-icon"><i class="fas fa-gem"></i></span>
+                        <span class="quality-name">专业</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 创意程度 -->
+            <div class="option-group">
+                <label class="option-label">
+                    <i class="fas fa-lightbulb"></i>
+                    <span>创意程度</span>
+                    <span class="creativity-value" id="creativityValue">5</span>
+                </label>
+                <div class="creativity-slider">
+                    <span class="slider-min">严格</span>
+                    <input type="range" id="creativitySlider" min="1" max="10" value="5" class="slider">
+                    <span class="slider-max">自由</span>
+                </div>
+                <p class="creativity-hint" id="creativityHint">平衡模式：保持线稿结构，适度添加装饰</p>
+            </div>
+        </section>
+
+        <!-- 生成按钮 -->
+        <section class="action-section">
+            <button id="generateBtn" class="btn-generate">
+                <span class="btn-content">
+                    <i class="fas fa-magic"></i>
+                    <span>开始生成</span>
+                </span>
+                <span class="btn-loading">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <span>生成中...</span>
+                </span>
+            </button>
+        </section>
+
+        <!-- 结果展示 -->
+        <section id="resultSection" class="result-section" style="display: none;">
+            <div class="result-card">
+                <div class="result-header">
+                    <h3><i class="fas fa-check-circle"></i> 生成完成</h3>
+                </div>
+                <div class="result-image">
+                    <img id="resultImage" src="" alt="生成结果">
+                </div>
+                <div class="result-actions">
+                    <button id="downloadBtn" class="btn-action">
+                        <i class="fas fa-download"></i>
+                        <span>下载</span>
+                    </button>
+                    <button id="regenerateBtn" class="btn-action btn-action-primary">
+                        <i class="fas fa-redo"></i>
+                        <span>重新生成</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 历史记录 -->
+        <section id="historySection" class="history-section">
+            <div class="section-header" id="historyHeader">
+                <h3><i class="fas fa-history"></i> 历史记录</h3>
+                <span id="historyCount" class="count-badge">0</span>
+                <button class="btn-toggle" id="toggleHistory">
+                    <i class="fas fa-chevron-down"></i>
                 </button>
-            </section>
-
-            <!-- 结果展示 -->
-            <section id="resultSection" class="result-section" style="display: none;">
-                <div class="result-card">
-                    <div class="result-header">
-                        <h3>生成结果</h3>
-                        <div class="result-actions">
-                            <button id="downloadBtn" class="btn btn-secondary">下载</button>
-                            <button id="shareBtn" class="btn btn-secondary">分享</button>
-                        </div>
-                    </div>
-                    <div class="result-image">
-                        <img id="resultImage" src="" alt="生成结果">
-                    </div>
-                </div>
-            </section>
-
-            <!-- 历史记录 -->
-            <section id="historySection" class="history-section">
-                <div class="section-header">
-                    <h3>历史记录</h3>
-                    <span id="historyCount" class="count-badge"></span>
-                </div>
-                <div id="historyList" class="history-list">
-                    <p class="empty-text">暂无历史记录</p>
-                </div>
-            </section>
-        </div>
+            </div>
+            <div class="history-list" id="historyList" style="display: none;">
+                <p class="empty-text">暂无历史记录</p>
+            </div>
+        </section>
     </main>
 
-    <script src="js/app.js"></script>
+    <!-- Toast 提示 -->
+    <div id="toast" class="toast"></div>
+
+    <script src="js/main.js"></script>
 </body>
 </html>

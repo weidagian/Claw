@@ -2,240 +2,118 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>管理后台 - 子问设计助手</title>
     <link rel="stylesheet" href="css/style.css">
-    <style>
-        .admin-container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        
-        .admin-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-        }
-        
-        .admin-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-        }
-        
-        .admin-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem;
-        }
-        
-        .admin-card {
-            background: var(--bg-card);
-            border-radius: var(--radius);
-            padding: 1.5rem;
-            box-shadow: var(--shadow);
-        }
-        
-        .admin-card h3 {
-            font-size: 1rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        
-        .form-group {
-            margin-bottom: 1rem;
-        }
-        
-        .form-group label {
-            display: block;
-            font-size: 0.85rem;
-            font-weight: 500;
-            margin-bottom: 0.5rem;
-            color: var(--text-secondary);
-        }
-        
-        .form-group .input {
-            font-size: 0.9rem;
-        }
-        
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-        }
-        
-        .switch-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.75rem 0;
-            border-bottom: 1px solid var(--border);
-        }
-        
-        .switch-row:last-child {
-            border-bottom: none;
-        }
-        
-        .switch-label {
-            font-size: 0.9rem;
-        }
-        
-        .switch {
-            position: relative;
-            width: 48px;
-            height: 26px;
-        }
-        
-        .switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-        
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            transition: 0.3s;
-            border-radius: 26px;
-        }
-        
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 20px;
-            width: 20px;
-            left: 3px;
-            bottom: 3px;
-            background-color: white;
-            transition: 0.3s;
-            border-radius: 50%;
-        }
-        
-        input:checked + .slider {
-            background-color: var(--primary);
-        }
-        
-        input:checked + .slider:before {
-            transform: translateX(22px);
-        }
-        
-        .btn-group {
-            display: flex;
-            gap: 0.75rem;
-            margin-top: 1rem;
-        }
-        
-        .stat-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 0.75rem 0;
-            border-bottom: 1px solid var(--border);
-        }
-        
-        .stat-row:last-child {
-            border-bottom: none;
-        }
-        
-        .stat-row .label {
-            color: var(--text-secondary);
-        }
-        
-        .stat-row .value {
-            font-weight: 600;
-        }
-        
-        .user-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.85rem;
-        }
-        
-        .user-table th,
-        .user-table td {
-            padding: 0.75rem;
-            text-align: left;
-            border-bottom: 1px solid var(--border);
-        }
-        
-        .user-table th {
-            font-weight: 600;
-            color: var(--text-secondary);
-            background: var(--bg);
-        }
-        
-        .log-list {
-            max-height: 300px;
-            overflow-y: auto;
-        }
-        
-        .log-item {
-            padding: 0.75rem;
-            border-bottom: 1px solid var(--border);
-            font-size: 0.8rem;
-        }
-        
-        .log-item:last-child {
-            border-bottom: none;
-        }
-        
-        .log-item .time {
-            color: var(--text-light);
-            font-size: 0.75rem;
-        }
-        
-        .admin-login {
-            max-width: 400px;
-            margin: 100px auto;
-            text-align: center;
-        }
-        
-        .admin-login .logo {
-            justify-content: center;
-            margin-bottom: 2rem;
-        }
-        
-        @media (max-width: 768px) {
-            .admin-header {
-                flex-direction: column;
-                gap: 1rem;
-                align-items: flex-start;
-            }
-            
-            .form-row {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body>
+<body class="admin-page">
+    <!-- 顶部导航 -->
     <header class="header">
         <div class="header-content">
             <div class="logo">
-                <div class="logo-icon">Z</div>
+                <div class="logo-icon">
+                    <i class="fas fa-cog"></i>
+                </div>
                 <div class="logo-text">
-                    <span class="logo-title">子问设计助手</span>
-                    <span class="logo-subtitle">管理后台</span>
+                    <span class="logo-title">管理后台</span>
+                    <span class="logo-subtitle">子问设计助手</span>
                 </div>
             </div>
-            <nav class="header-nav">
-                <a href="index.html" class="nav-link">返回首页</a>
-            </nav>
+            <div class="header-right">
+                <button class="btn-icon" id="logoutBtn" title="退出">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
         </div>
     </header>
 
-    <main class="main-content">
-        <div class="admin-container" id="AdminContent">
-            <!-- 内容由 JS 动态加载 -->
-        </div>
+    <!-- 主内容 -->
+    <main class="admin-content">
+        <!-- 统计卡片 -->
+        <section class="stats-section">
+            <div class="stat-card">
+                <div class="stat-icon" style="background: #DBEAFE; color: #3B82F6;">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-value" id="totalUsers">0</span>
+                    <span class="stat-label">总用户</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background: #D1FAE5; color: #10B981;">
+                    <i class="fas fa-image"></i>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-value" id="totalGenerations">0</span>
+                    <span class="stat-label">总生成</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background: #FEF3C7; color: #F59E0B;">
+                    <i class="fas fa-calendar-day"></i>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-value" id="todayGenerations">0</span>
+                    <span class="stat-label">今日生成</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- 用户列表 -->
+        <section class="users-section">
+            <div class="section-header">
+                <h2><i class="fas fa-user-friends"></i> 用户列表</h2>
+                <button class="btn-refresh" id="refreshBtn">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+            </div>
+            <div class="users-table-wrapper">
+                <table class="users-table">
+                    <thead>
+                        <tr>
+                            <th>用户</th>
+                            <th>类型</th>
+                            <th>积分</th>
+                            <th>使用次数</th>
+                            <th>注册时间</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersTableBody">
+                        <tr>
+                            <td colspan="6" class="empty-cell">加载中...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
     </main>
+
+    <!-- 登录弹窗 -->
+    <div class="modal-overlay" id="loginModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>管理员登录</h3>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>管理员密码</label>
+                    <input type="password" id="adminPassword" placeholder="请输入管理员密码">
+                </div>
+                <div class="error-message" id="loginError" style="display: none;"></div>
+                <button class="btn-submit" id="loginBtn">
+                    <span>登录</span>
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="toast"></div>
 
     <script src="js/admin.js"></script>
 </body>

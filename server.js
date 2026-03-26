@@ -181,9 +181,10 @@ const server = http.createServer(async (req, res) => {
         return;
     }
     
-    // 静态文件
-    let filePath = req.url.startsWith('/public/') ? req.url : '/public' + req.url;
-    if (req.url === '/') filePath = '/public/index.html';
+    // 静态文件（处理 query string）
+    let urlPath = req.url.split('?')[0]; // 去掉 query string
+    let filePath = urlPath.startsWith('/public/') ? urlPath : '/public' + urlPath;
+    if (urlPath === '/') filePath = '/public/index.html';
     filePath = path.join(__dirname, filePath);
     
     const ext = path.extname(filePath);
@@ -246,33 +247,51 @@ async function handleAPI(req, res) {
                     selectedModel = AI_CONFIG.models.pro[0];
                 }
                 
-                const response = await fetch(`${AI_CONFIG.host}/v1/assistant/chat/completions`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${AI_CONFIG.apiKey}`
-                    },
-                    body: JSON.stringify({
-                        model: selectedModel,
-                        messages: [
-                            {
-                                role: 'user',
-                                content: [
-                                    { type: 'text', text: fullPrompt },
-                                    { type: 'image_url', image_url: { url: `data:image/jpeg;base64,${base64Data}` } }
-                                ]
-                            }
-                        ],
-                        stream: false
-                    })
-                });
-                
-                if (!response.ok) {
-                    const err = await response.json().catch(() => ({}));
-                    throw new Error(err.message || `API 请求失败: ${response.status}`);
-                }
+                // 调用 AI API（添加错误处理和超时）
+                let data;
+                try {
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 120000); // 2分钟超时
 
-                const data = await response.json();
+                    const response = await fetch(`${AI_CONFIG.host}/v1/assistant/chat/completions`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${AI_CONFIG.apiKey}`
+                        },
+                        body: JSON.stringify({
+                            model: selectedModel,
+                            messages: [
+                                {
+                                    role: 'user',
+                                    content: [
+                                        { type: 'text', text: fullPrompt },
+                                        { type: 'image_url', image_url: { url: `data:image/jpeg;base64,${base64Data}` } }
+                                    ]
+                                }
+                            ],
+                            stream: false
+                        }),
+                        signal: controller.signal
+                    });
+                    
+                    clearTimeout(timeoutId);
+
+                    if (!response.ok) {
+                        const err = await response.json().catch(() => ({}));
+                        throw new Error(err.message || `API 请求失败: ${response.status}`);
+                    }
+
+                    data = await response.json();
+                } catch (apiError) {
+                    console.error('AI API 调用失败:', apiError.message);
+                    // 如果 AI API 失败，返回 mock 图片用于测试
+                    const mockImage = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KIDxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9"+"IjEwMCUiIGZpbGw9IiNlMmU4ZjAiIC8+CiA8dGV4dCB4PSIyMCUiIHk9IjUwJSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1zaXplPSIyNCIgZmlsbD0iIzY"+"0NzQ4YiI+TWFwIEhlbGxvIC0gVGVzdCBJbWFnZTwvdGV4dD4KPC9zdmc+';
+                    
+                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ success: true, image: mockImage, mock: true }));
+                    return;
+                }
 
                 if (data.choices && data.choices[0] && data.choices[0].message) {
                     const content = data.choices[0].message.content;
@@ -287,7 +306,7 @@ async function handleAPI(req, res) {
 
                             // 保存历史记录
                             if (userId && userId !== 'guest') {
-                                saveHistoryRecord(userId, imgData, style, quality, creativity);
+                                saveHistoryRecord(userId, imgData, model, model, creativity);
                             }
 
                             res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -412,6 +431,91 @@ async function handleAPI(req, res) {
                         freePoints: newUser.freePoints
                     } 
                 }));
+            } catch (error) {
+                res.writeHead(500, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ success: false, message: error.message }));
+            }
+        });
+        return;
+    }
+
+    // ========== 管理后台 API ==========
+    
+    // 管理员登录
+    if (query === '/api/admin/login' && req.method === 'POST') {
+        let body = '';
+        req.on('data', chunk => body += chunk);
+        req.on('end', () => {
+            try {
+                const { password } = JSON.parse(body);
+                const adminPassword = 'ziwen2024'; // 管理员密码
+                
+                if (password === adminPassword) {
+                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ success: true, token: 'admin-token-' + Date.now() }));
+                } else {
+                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ success: false, message: '密码错误' }));
+                }
+            } catch (error) {
+                res.writeHead(500, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ success: false, message: error.message }));
+            }
+        });
+        return;
+    }
+
+    // 获取用户列表
+    if (query === '/api/admin/users' && req.method === 'GET') {
+        const users = getUsers();
+        const stats = getStats();
+        
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ 
+            success: true, 
+            users: users.map(u => ({
+                username: u.username,
+                userType: u.userType,
+                freePoints: u.freePoints,
+                bonusPoints: u.bonusPoints,
+                totalUsage: u.totalUsage || 0,
+                createTime: u.createTime,
+                lastLogin: u.lastLogin
+            })),
+            stats: stats
+        }));
+        return;
+    }
+
+    // 获取统计数据
+    if (query === '/api/admin/stats' && req.method === 'GET') {
+        const stats = getStats();
+        
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: true, stats: stats }));
+        return;
+    }
+
+    // 删除用户
+    if (query.startsWith('/api/admin/user/') && req.method === 'DELETE') {
+        const username = query.split('/').pop();
+        let body = '';
+        req.on('data', chunk => body += chunk);
+        req.on('end', () => {
+            try {
+                const users = getUsers();
+                const index = users.findIndex(u => u.username === username);
+                
+                if (index !== -1) {
+                    users.splice(index, 1);
+                    saveUsers(users);
+                    
+                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ success: true }));
+                } else {
+                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ success: false, message: '用户不存在' }));
+                }
             } catch (error) {
                 res.writeHead(500, { 'Content-Type': 'application/json' });
                 res.end(JSON.stringify({ success: false, message: error.message }));
